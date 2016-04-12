@@ -1,47 +1,36 @@
-﻿namespace GoTournament
-   {
-   using System;
-   using System.Collections.Generic;
-   using System.Diagnostics;
-   using System.IO;
-   using System.Linq;
-   using System.Text;
-   using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
+using System.Threading;
 
-   public class Program
-      {
-      static void Main(string[] args)
-         {
-         ProcessStartInfo processStartInfo = new ProcessStartInfo();
+namespace GoTournament
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Text;
+    using System.Threading.Tasks;
 
-         processStartInfo.FileName = @"d:\GnuGo\gnugo-3.8\gnugo.exe";
-         processStartInfo.Arguments = @"--mode gtp";
-         processStartInfo.RedirectStandardInput = true;
-         processStartInfo.RedirectStandardOutput = true;
-         processStartInfo.UseShellExecute = false;
-
-         using (Process process = Process.Start(processStartInfo))
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            Task.Run(() =>
             {
-            Console.WriteLine(process.Id.ToString());
+                var botWhite = new GnuGoBot(Properties.Settings.Default.gnuBotPath);
+                botWhite.SetBoardSize(15);
+                botWhite.SetLevel(1);
+                var botBlack = new GnuGoBot(Properties.Settings.Default.gnuBotPath);
+                botBlack.SetBoardSize(15);
+                botWhite.SetLevel(10);
+                botWhite.MovePerformed = move => botBlack.PlaceMove(move);
+                botBlack.MovePerformed = move => botWhite.PlaceMove(move);
+                botWhite.StartGame(false);
+                botBlack.StartGame(true);
+            });
+            Console.ReadLine();
+            Console.WriteLine("----finished----");
+            Console.ReadLine();
+        }
 
-            process.OutputDataReceived += Process_OutputDataReceived;
-
-            process.BeginOutputReadLine();
-
-            process.StandardInput.WriteLine("showboard");
-            process.StandardInput.WriteLine("quit");
-
-            process.WaitForExit();
-            }
-         }
-
-      private static void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
-         {
-         string receivedData;
-
-         receivedData = e.Data;
-
-         Console.WriteLine(receivedData);
-         }
-      }
-   }
+    }
+}
