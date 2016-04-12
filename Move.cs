@@ -34,7 +34,7 @@ namespace GoTournament
         {
             var clean = data.Replace(" ","").Replace("=","");
             if (clean.Length < 2)
-                return null; //throw new ArgumentException("Move should have 2 or 3 characters");
+                return null; 
             if (clean.ToLower().Contains("pass"))
                 return PassMove();
             if (clean.Length > 3)
