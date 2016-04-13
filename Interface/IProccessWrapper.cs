@@ -1,6 +1,6 @@
 using System;
 
-namespace GoTournament
+namespace GoTournament.Interface
 {
     public interface IProccessWrapper
     {

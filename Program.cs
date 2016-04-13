@@ -1,10 +1,10 @@
 ﻿using System.Security.Cryptography;
 using System.Threading;
+using GoTournament.Interface;
 
 namespace GoTournament
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
@@ -14,21 +14,38 @@ namespace GoTournament
     {
         static void Main(string[] args)
         {
+            var botWhite = new GnuGoBot(Properties.Settings.Default.gnuBotPath, "WhiteBot")
+            {
+                BoardSize = 10,
+                Level = 1,
+                MaxPassCount = 3
+            };
+            var botBlack = new GnuGoBot(Properties.Settings.Default.gnuBotPath, "BlackBot")
+            {
+                BoardSize = 10,
+                Level = 10,
+                MaxPassCount = 3
+            };
+            IBotRunner botRunner = null;
+
+            var cancelToken = new CancellationTokenSource();
             Task.Run(() =>
             {
-                var botWhite = new GnuGoBot(Properties.Settings.Default.gnuBotPath);
-                botWhite.SetBoardSize(15);
-                botWhite.SetLevel(1);
-                var botBlack = new GnuGoBot(Properties.Settings.Default.gnuBotPath);
-                botBlack.SetBoardSize(15);
-                botWhite.SetLevel(10);
-                botWhite.MovePerformed = move => botBlack.PlaceMove(move);
-                botBlack.MovePerformed = move => botWhite.PlaceMove(move);
-                botWhite.StartGame(false);
-                botBlack.StartGame(true);
-            });
+                botRunner = new BotRunner(botBlack, botWhite)
+                {
+                    Resigned = s => Console.WriteLine("Bot {0} has resigned the game", s),
+                    PassLimitPassed = s => Console.WriteLine("Bot {0} has passed too many times", s)
+                };
+            }, cancelToken.Token);
+
             Console.ReadLine();
-            Console.WriteLine("----finished----");
+
+            if (botRunner != null && !botRunner.IsFinished)
+            {
+                botRunner.Cancel();
+                cancelToken.Cancel();
+                Console.WriteLine("Game was canceled");
+            } else Console.WriteLine("Press enter to exit");
             Console.ReadLine();
         }
 
