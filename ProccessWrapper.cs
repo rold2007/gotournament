@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using GoTournament.Interface;
 
 namespace GoTournament
 {
@@ -50,6 +51,7 @@ namespace GoTournament
 
         private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
+            if (_disposed) return;
             if (DataReceived != null)
                 DataReceived(e.Data);
         }
