@@ -1,26 +1,46 @@
 using System;
+using System.Collections;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using GoTournament.Interface;
 
 namespace GoTournament
 {
     public class GnuGoBot : IDisposable, IGoBot
     {
+        #region Fields
+
+        private IProcessWrapper _process;
         private readonly string _binaryPath;
         private int _boardSize = 19;
         private bool _black;
         private string _genmoveCommand;
-        private IProccessWrapper _process;
         private bool _disposed;
         private int _level;
-        private int _passCount = 0;
-        private int _maxPassCount = 10;
+        private bool _lastInputMoveIsPass;
+        #endregion
 
-        public GnuGoBot(string binaryPath, string name)
+        #region Ctors
+
+        public GnuGoBot(string binaryPath, string name, IFileService fileService)
         {
+            if (!fileService.FileExists(binaryPath))
+                throw new FileNotFoundException("Bot binnary not found,", binaryPath);
             _binaryPath = binaryPath;
             Name = name;
+            //To reduce null reference checking 
+            MovePerformed = delegate { };
+            Resign = delegate { };
+            SecondPass = delegate { };
         }
+
+        public GnuGoBot(string binaryPath, string name) : this(binaryPath, name, new FileService()) { }
+
+        #endregion
+
+        #region Properties
 
         public int BoardSize
         {
@@ -46,16 +66,21 @@ namespace GoTournament
             }
         }
 
-        public void SetBoardSize(int size)
-        {
+        public string Name { get; private set; }
 
-        }
+        public Action<Move> MovePerformed { get; set; }
+        public Action Resign { get; set; }
+        public Action SecondPass { get; set; }
+
+        #endregion
+
+        #region Public methods
 
         public void StartGame(bool goesFirst)
         {
             _black = goesFirst;
             _genmoveCommand = _black ? "genmove black" : "genmove white";
-            _process = new ProccessWrapper(_binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
+            _process = new ProcessWrapper(_binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
             InitializeGame();
             if (_black)
                 PerformMove();
@@ -64,44 +89,44 @@ namespace GoTournament
         public void PlaceMove(Move move)
         {
             if (move == null) throw new ArgumentNullException(nameof(move));
-            if(_process == null) throw new ObjectDisposedException("proccess");
+            if (_process == null) throw new ObjectDisposedException("proccess");
+            _lastInputMoveIsPass = move.Pass;
+
             _process.WriteData((_black ? "white " : "black ") + move);
             Console.ForegroundColor = _black ? ConsoleColor.Blue : ConsoleColor.DarkYellow;
             Console.WriteLine((_black ? "white " : "black ") + move);
-            Console.Clear();
+             Console.Clear();
             _process.WriteData("showboard");
             //Thread.Sleep(1000);
             PerformMove();
         }
+
+        #endregion
+
+        #region Private methods
 
         private void OnDataReceived(string s)
         {
             if (s == null) return;
             if (s.ToLower().Contains("resign"))
             {
-                if (Resign != null)
-                    Resign();
-                else return;
+                Resign();
+                return;
             }
             if (s.Replace(" ", "").Replace("=", "").Any()) //for debugging purpose
                 Console.WriteLine(s);
-            if (MovePerformed != null)
+
+            var move = Move.Parse(s);
+            if (move != null)
             {
-                var move = Move.Parse(s);
-                if (move != null)
+                if (move.Pass && _lastInputMoveIsPass)
                 {
-                    if (move.Pass)
-                        _passCount++;
-                    else _passCount = 0;
-                    if (_passCount > MaxPassCount)
-                    {
-                        if (PassLimitPassed != null)
-                            PassLimitPassed();
-                        return;
-                    }
-                    MovePerformed(move);
+                    SecondPass();
+                    return;
                 }
+                MovePerformed(move);
             }
+
         }
 
         private void PerformMove()
@@ -116,19 +141,10 @@ namespace GoTournament
             _process.WriteData("level {0}", _level);
         }
 
-        public string Name { get; private set; }
-
-        public int MaxPassCount
-        {
-            get { return _maxPassCount; }
-            set { _maxPassCount = value; }
-        }
-
-        public Action<Move> MovePerformed { get; set; }
-        public Action Resign { get; set; }
-        public Action PassLimitPassed { get; set; }
+        #endregion
 
         #region IDisposable pattern
+
         public void Dispose()
         {
             Dispose(true);

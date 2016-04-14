@@ -6,19 +6,22 @@ namespace GoTournament
 {
     public class BotRunner : IBotRunner
     {
+        private readonly IAdjudicator _adjudicator;
         private readonly List<IGoBot> _bots;
 
-        public BotRunner(IGoBot first, IGoBot second)
+        public BotRunner(/*IAdjudicator adjudicator,*/ IGoBot black, IGoBot white)
         {
-            if (first == null) throw new ArgumentNullException(nameof(first));
-            if (second == null) throw new ArgumentNullException(nameof(second));
-            if(ReferenceEquals(first,second)) throw new ArgumentException("Two instances cannot point to the same object");
-            _bots = new List<IGoBot> { first, second };
-            first.MovePerformed = second.PlaceMove;
-            second.MovePerformed = first.PlaceMove;
+           // _adjudicator = adjudicator;
+            if (black == null) throw new ArgumentNullException(nameof(black));
+            if (white == null) throw new ArgumentNullException(nameof(white));
+            if(ReferenceEquals(black,white)) throw new ArgumentException("Two instances cannot point to the same object");
+            _bots = new List<IGoBot> { black, white };
+            black.MovePerformed = white.PlaceMove; //BlackMovePerformed
+           // _adjudicator.BlackMoveValidated = white.PlaceMove;
+            white.MovePerformed = black.PlaceMove;
             _bots.ForEach(b =>
             {
-                b.PassLimitPassed = () =>
+                b.SecondPass = () =>
                 {
                     IsFinished = true;
                     if (PassLimitPassed != null)
@@ -32,13 +35,19 @@ namespace GoTournament
                 };
             });
 
-            second.StartGame(false);
-            first.StartGame(true);
+            white.StartGame(false);
+            black.StartGame(true);
+        }
+
+        private void BlackMovePerformed(Move move)
+        {
+            _adjudicator.BlackMoves(move);
         }
 
         public void Cancel()
         {
             _bots.ForEach(b=>b.Dispose());
+           // _adjudicator.Dispose();
         }
 
         public bool IsFinished { get; private set; }

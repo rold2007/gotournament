@@ -4,14 +4,14 @@ using GoTournament.Interface;
 
 namespace GoTournament
 {
-    public class ProccessWrapper : IDisposable, IProccessWrapper
+    public class ProcessWrapper : IDisposable, IProcessWrapper
     {
         private readonly string _binnaryPath;
         private readonly string _arguments;
         private bool _disposed;
         private Process _process;
 
-        public ProccessWrapper(string binnaryPath, string arguments)
+        public ProcessWrapper(string binnaryPath, string arguments)
         {
             _binnaryPath = binnaryPath;
             _arguments = arguments;
@@ -40,12 +40,19 @@ namespace GoTournament
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
-            _process = Process.Start(processStartInfo);
-
-            if (_process != null)
+            try
             {
-                _process.OutputDataReceived += _process_OutputDataReceived;
-                _process.BeginOutputReadLine();
+                _process = Process.Start(processStartInfo);
+
+                if (_process != null)
+                {
+                    _process.OutputDataReceived += _process_OutputDataReceived;
+                    _process.BeginOutputReadLine();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}", _binnaryPath, _arguments), new[] {ex});
             }
         }
 
@@ -79,7 +86,7 @@ namespace GoTournament
             }
         }
 
-        ~ProccessWrapper()
+        ~ProcessWrapper()
         {
             Dispose(false);
         }

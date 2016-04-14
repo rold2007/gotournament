@@ -9,10 +9,9 @@ namespace GoTournament.Interface
         string Name { get; }
         int BoardSize { get; set; }
         int Level { get; set; }
-        int MaxPassCount { get; set; }
         Action<Move> MovePerformed { get; set; }
         Action Resign { get; set; }
-        Action PassLimitPassed { get; set; }
+        Action SecondPass { get; set; }
         void Dispose();
     }
 }
