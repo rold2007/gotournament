@@ -2,7 +2,7 @@ using System;
 
 namespace GoTournament.Interface
 {
-    public interface IGoBot
+    public interface IGoBot : IDisposable
     {
         void StartGame(bool goesFirst);
         void PlaceMove(Move move);
@@ -10,8 +10,5 @@ namespace GoTournament.Interface
         int BoardSize { get; set; }
         int Level { get; set; }
         Action<Move> MovePerformed { get; set; }
-        Action Resign { get; set; }
-        Action SecondPass { get; set; }
-        void Dispose();
     }
 }
