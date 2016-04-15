@@ -1,45 +1,75 @@
 namespace GoTournament
 {
+    public enum MoveType { None, Normal, Pass, Resign, Invalid, Illegal }
+
     public class Move
     {
+
+        public MoveType Type { get; private set; }
         public string Letter { get; set; }
         public string Number { get; set; }
 
-        public bool Pass { get; set; }
+        public bool Pass
+        {
+            get { return Type == MoveType.Pass; }
+        }
+
+        public bool Resign
+        {
+            get { return Type == MoveType.Resign; }
+        }
+
+        public bool Invalid
+        {
+            get { return Type == MoveType.Invalid; }
+        }
+
+        public bool Illegal
+        {
+            get { return Type == MoveType.Illegal; }
+        }
 
         public override string ToString()
         {
-            if (Pass)
-                return "PASS";
-            return Letter + Number;
+            if (Type == MoveType.Normal)
+                return Letter + Number;
+            return Type.ToString();
         }
 
         public Move(string letter, string number)
         {
             Letter = letter;
             Number = number;
+            Type = MoveType.Normal;
         }
 
         public Move()
         {
-            
+
         }
-        
-        public static Move PassMove()
+
+        public static Move SpecialMove(MoveType type)
         {
-            return new Move {Pass = true};
+            return new Move { Type = type };
         }
+
 
         public static Move Parse(string data)
         {
-            var clean = data.Replace(" ","").Replace("=","");
+            var clean = data.Replace(" ", "").Replace("=", "");
             if (clean.Length < 2)
-                return null; 
-            if (clean.ToLower().Contains("pass"))
-                return PassMove();
-            if (clean.Length > 3)
                 return null;
-            return new Move(clean[0].ToString(), clean.Substring(1));
+            if (clean.Length < 4) //it should be the most often case that's why it is reletivly in the beginning
+                return new Move(clean[0].ToString(), clean.Substring(1));
+            if (clean.ToLower().Contains("pass"))
+                return SpecialMove(MoveType.Pass);
+            if (clean.ToLower().Contains("resign"))
+                return SpecialMove(MoveType.Resign);
+            if (clean.ToLower().Contains("illegal move"))
+                return SpecialMove(MoveType.Illegal);
+            if (clean.ToLower().Contains("invalid coordinate"))
+                return SpecialMove(MoveType.Invalid);
+            return null;
         }
     }
 }

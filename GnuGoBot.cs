@@ -8,7 +8,7 @@ using GoTournament.Interface;
 
 namespace GoTournament
 {
-    public class GnuGoBot : IDisposable, IGoBot
+    public class GnuGoBot : IGoBot
     {
         #region Fields
 
@@ -19,7 +19,7 @@ namespace GoTournament
         private string _genmoveCommand;
         private bool _disposed;
         private int _level;
-        private bool _lastInputMoveIsPass;
+        private bool _waitingForMoveGenerating;
         #endregion
 
         #region Ctors
@@ -32,8 +32,6 @@ namespace GoTournament
             Name = name;
             //To reduce null reference checking 
             MovePerformed = delegate { };
-            Resign = delegate { };
-            SecondPass = delegate { };
         }
 
         public GnuGoBot(string binaryPath, string name) : this(binaryPath, name, new FileService()) { }
@@ -69,8 +67,6 @@ namespace GoTournament
         public string Name { get; private set; }
 
         public Action<Move> MovePerformed { get; set; }
-        public Action Resign { get; set; }
-        public Action SecondPass { get; set; }
 
         #endregion
 
@@ -90,14 +86,8 @@ namespace GoTournament
         {
             if (move == null) throw new ArgumentNullException(nameof(move));
             if (_process == null) throw new ObjectDisposedException("proccess");
-            _lastInputMoveIsPass = move.Pass;
 
             _process.WriteData((_black ? "white " : "black ") + move);
-            Console.ForegroundColor = _black ? ConsoleColor.Blue : ConsoleColor.DarkYellow;
-            Console.WriteLine((_black ? "white " : "black ") + move);
-             Console.Clear();
-            _process.WriteData("showboard");
-            //Thread.Sleep(1000);
             PerformMove();
         }
 
@@ -107,30 +97,23 @@ namespace GoTournament
 
         private void OnDataReceived(string s)
         {
-            if (s == null) return;
-            if (s.ToLower().Contains("resign"))
-            {
-                Resign();
-                return;
-            }
-            if (s.Replace(" ", "").Replace("=", "").Any()) //for debugging purpose
-                Console.WriteLine(s);
+            //debug
+            //  File.AppendAllText(Name+".txt", string.Format("{0}|{1}|{2}", DateTime.Now.ToString("h:mm:ss.ff"), s, Environment.NewLine));
 
+            if (!_waitingForMoveGenerating) return;
+            if (s == null) return;
             var move = Move.Parse(s);
             if (move != null)
             {
-                if (move.Pass && _lastInputMoveIsPass)
-                {
-                    SecondPass();
-                    return;
-                }
                 MovePerformed(move);
+                _waitingForMoveGenerating = false;
             }
 
         }
 
         private void PerformMove()
         {
+            _waitingForMoveGenerating = true;
             _process.WriteData(_genmoveCommand);
         }
 
@@ -175,4 +158,5 @@ namespace GoTournament
 
         #endregion
     }
+
 }

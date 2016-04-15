@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace GoTournament.Interface
 {
-    public interface IAdjudicator
+    public interface IAdjudicator : IDisposable
     {
-        bool BlackMoves(Move move);
-        bool WhiteMoves(Move move);
-        Action<bool> WhiteMoveValidated { get; set; }
-        Action<bool> BlackMoveValidated { get; set; }
+        void BlackMoves(Move move);
+        void WhiteMoves(Move move);
+        Action<Move> WhiteMoveValidated { get; set; }
+        Action<Move> BlackMoveValidated { get; set; }
         Action<IEnumerable<string>> BoardUpdated { get; set; }
-        void Dispose();
+        Action<EndGameReason, bool> Resigned { get; set; }
     }
 }
