@@ -1,3 +1,5 @@
+using System;
+
 namespace GoTournament
 {
     public enum MoveType { None, Normal, Pass, Resign, Invalid, Illegal }
@@ -29,6 +31,11 @@ namespace GoTournament
             get { return Type == MoveType.Illegal; }
         }
 
+        public bool Normal
+        {
+            get { return Type == MoveType.Normal; }
+        }
+        
         public override string ToString()
         {
             if (Type == MoveType.Normal)
@@ -43,14 +50,29 @@ namespace GoTournament
             Type = MoveType.Normal;
         }
 
+        public EndGameReason ToEndGameReason()
+        {
+            switch (Type)
+            {
+                case MoveType.Pass:
+                    return EndGameReason.ConsecutivePass;
+                case MoveType.Resign:
+                    return EndGameReason.Resign;
+                case MoveType.Invalid:
+                case MoveType.Illegal:
+                    return EndGameReason.InvalidMove;
+                default:
+                    return EndGameReason.None;
+            }
+        }
+
         public Move()
         {
-
         }
 
         public static Move SpecialMove(MoveType type)
         {
-            return new Move { Type = type };
+            return new Move {Type = type};
         }
 
 

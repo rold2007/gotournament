@@ -20,15 +20,15 @@ namespace GoTournament
             _bots = new List<IDisposable> { black, white, adjudicator };
 
             EndGame = delegate { };
-            /*  black.MovePerformed = adjudicator.BlackMoves;
+              black.MovePerformed = adjudicator.BlackMoves;
               white.MovePerformed = adjudicator.WhiteMoves;
               adjudicator.BlackMoveValidated = white.PlaceMove;
-              adjudicator.WhiteMoveValidated = black.PlaceMove;*/
+              adjudicator.WhiteMoveValidated = black.PlaceMove;
 
-            black.MovePerformed = adjudicator.BlackMoves;
-            white.MovePerformed = adjudicator.WhiteMoves;
+           /* black.MovePerformed = adjudicator.BlackMoves;
+            white.MovePerformed = adjudicator.WhiteMoves;*/
             
-            adjudicator.BlackMoveValidated = m =>
+           /* adjudicator.BlackMoveValidated = m =>
             {
                 Console.WriteLine("white {0}", m);
                 white.PlaceMove(m);
@@ -37,7 +37,7 @@ namespace GoTournament
             {
                 Console.WriteLine("black {0}", m);
                 black.PlaceMove(m);
-            };
+            };*/
 
 
             adjudicator.Resigned = (reason, b) =>

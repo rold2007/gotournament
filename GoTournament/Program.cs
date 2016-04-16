@@ -8,7 +8,7 @@ namespace GoTournament
 
     public class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             try
             {
@@ -25,20 +25,20 @@ namespace GoTournament
 
         private static void RunBotRunner()
         {
-            var size = 19;
+            var size = 4;
             var finished = false;
             var sync = new object();
-            var botWhite = new GnuGoBot(Properties.Settings.Default.gnuBotPath, "WhiteBot")
+            var botWhite = new GnuGoBot("WhiteBot")
+            {
+                BoardSize = size,
+                Level = 10
+            };
+            var botBlack = new GnuGoBot("BlackBot")
             {
                 BoardSize = size,
                 Level = 1
             };
-            var botBlack = new GnuGoBot(Properties.Settings.Default.gnuBotPath, "BlackBot")
-            {
-                BoardSize = size,
-                Level = 1
-            };
-            var judge = new Adjudicator(Properties.Settings.Default.gnuBotPath, size)
+            var judge = new Adjudicator(size)
             {
                 BoardUpdated = board =>
                 {

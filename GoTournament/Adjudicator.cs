@@ -29,7 +29,6 @@ namespace GoTournament
             if (!fileService.FileExists(binaryPath))
                 throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
             _process = new ProcessWrapper(binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
-            BoardUpdated = delegate { };
             if (boardsize != 19)
             {
                 _process.WriteData("boardsize {0}", boardsize);
@@ -47,6 +46,9 @@ namespace GoTournament
 
         public Adjudicator(string binaryPath, int boardsize) : this(binaryPath, boardsize, new FileService()) { }
         public Adjudicator(string binaryPath) : this(binaryPath, 19, new FileService()) { }
+        public Adjudicator(int boardsize) : this(Properties.Settings.Default.gnuBotPath, boardsize) { }
+        public Adjudicator() : this(Properties.Settings.Default.gnuBotPath, 19) { }
+        
 
         #endregion
 
@@ -80,9 +82,14 @@ namespace GoTournament
             if (move == null) throw new ArgumentNullException(nameof(move));
             if (_process == null) throw new ObjectDisposedException("proccess");
 
-            if (_lastInputMoveIsPass && move.Pass)
+            if (!move.Normal)
             {
-                Resigned(EndGameReason.ConsecutivePass, !_whiteGoes);
+                if (_lastInputMoveIsPass && move.Pass)
+                {
+                    Resigned(EndGameReason.ConsecutivePass, !_whiteGoes);
+                    return;
+                }
+                Resigned(move.ToEndGameReason(), !_whiteGoes);
                 return;
             }
             _lastInputMoveIsPass = move.Pass;
@@ -135,7 +142,8 @@ namespace GoTournament
             if (!_whiteGoes) //vice versa because not yet switched
                 WhiteMoveValidated(_lastReceivedMove);
             else BlackMoveValidated(_lastReceivedMove);
-            UpdateBoard();
+            if(BoardUpdated != null) // If there is no subscription, don't even get this info
+                UpdateBoard();
         }
 
         public Action<Move> WhiteMoveValidated { get; set; }
