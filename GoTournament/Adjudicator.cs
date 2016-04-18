@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using GoTournament.Interface;
@@ -21,6 +22,9 @@ namespace GoTournament
         private readonly List<string> _boardParts = new List<string>(26);
         private bool _lastInputMoveIsPass;
         private Move _lastReceivedMove;
+        private int _movesCount;
+        private static TaskCompletionSource<bool> _tcs;
+
 
         #region Ctors
 
@@ -41,6 +45,7 @@ namespace GoTournament
         private void UpdateBoard()
         {
             _waitingForShowBoard = true;
+            _boardParts.Clear();
             _process.WriteData("showboard");
         }
 
@@ -48,7 +53,7 @@ namespace GoTournament
         public Adjudicator(string binaryPath) : this(binaryPath, 19, new FileService()) { }
         public Adjudicator(int boardsize) : this(Properties.Settings.Default.gnuBotPath, boardsize) { }
         public Adjudicator() : this(Properties.Settings.Default.gnuBotPath, 19) { }
-        
+
 
         #endregion
 
@@ -86,10 +91,10 @@ namespace GoTournament
             {
                 if (_lastInputMoveIsPass && move.Pass)
                 {
-                    Resigned(EndGameReason.ConsecutivePass, !_whiteGoes);
+                    RaiseResigned(EndGameReason.ConsecutivePass, !_whiteGoes);
                     return;
                 }
-                Resigned(move.ToEndGameReason(), !_whiteGoes);
+                RaiseResigned(move.ToEndGameReason(), !_whiteGoes);
                 return;
             }
             _lastInputMoveIsPass = move.Pass;
@@ -105,7 +110,7 @@ namespace GoTournament
             {
                 if (line == "? illegal move" || line == "? invalid coordinate")
                 {
-                    Resigned(EndGameReason.InvalidMove, _whiteGoes);
+                    RaiseResigned(EndGameReason.InvalidMove, _whiteGoes);
                     _waitingForMoveResult = false;
                 }
                 if (line == "= ")
@@ -118,32 +123,56 @@ namespace GoTournament
 
             if (_waitingForShowBoard)
             {
-                if (line.Contains(" A ")) //For case when board is 1x1 or more
-                {
-                    if (_boardParts.Count > 2 && _boardParts.Any(l => l.Contains(" ")) && _boardParts.Last().Contains("1"))
-                    {
-                        if (_boardParts.First().Contains(" A "))
-                            _boardParts.RemoveAt(0);
-                        int firstLineId = _boardParts.IndexOf(_boardParts.First(l => l.Contains(" A ")));
-                        if (firstLineId > 0)
-                            _boardParts.RemoveRange(0, firstLineId);
-                        _boardParts.Add(line);
-                        _waitingForShowBoard = false;
-                        BoardUpdated(_boardParts);
-                        _boardParts.Clear();
-                    }
-                }
-                _boardParts.Add(line);
+                HandleBoardReading(line);
             }
+        }
+
+        private void HandleBoardReading(string line)
+        {
+            if (line.Contains(" A ")) //For case when board is 1x1 or more
+            {
+                if (_boardParts.Count > 2 && _boardParts.Any(l => l.Contains(" ")) && _boardParts.Last().Contains("1"))
+                {
+                    if (_boardParts.First().Contains(" A "))
+                        _boardParts.RemoveAt(0);
+                    int firstLineId = _boardParts.IndexOf(_boardParts.First(l => l.Contains(" A ")));
+                    if (firstLineId > 0)
+                        _boardParts.RemoveRange(0, firstLineId);
+                    _boardParts.Add(line);
+                    _waitingForShowBoard = false;
+                    if (BoardUpdated != null)
+                        BoardUpdated(_boardParts);
+                    if (_tcs != null)
+                        _tcs.SetResult(true);
+                }
+            }
+            _boardParts.Add(line);
         }
 
         private void PushValidationResult()
         {
+            _movesCount++;
             if (!_whiteGoes) //vice versa because not yet switched
                 WhiteMoveValidated(_lastReceivedMove);
             else BlackMoveValidated(_lastReceivedMove);
-            if(BoardUpdated != null) // If there is no subscription, don't even get this info
+            if (BoardUpdated != null) // If there is no subscription, don't even get this info
                 UpdateBoard();
+        }
+
+        private async void RaiseResigned(EndGameReason reason, bool whiteFinishedGame)
+        {
+            if (GenerateSgfFile)
+                _process.WriteData("printsgf trace{0}.sgf", DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
+            var board = GenerateLatBoard ? await GetLastBoard() : string.Empty;
+            Resigned(new GameStatistic { EndReason = reason, TotalMoves = _movesCount, WhiteFinishedGame = whiteFinishedGame, FinalBoard = board });
+        }
+
+        private async Task<string> GetLastBoard()
+        {
+            _tcs = new TaskCompletionSource<bool>();
+            UpdateBoard();
+            await _tcs.Task;
+            return string.Join("\n", _boardParts);
         }
 
         public Action<Move> WhiteMoveValidated { get; set; }
@@ -151,8 +180,10 @@ namespace GoTournament
         /// <summary>
         /// Resign because of wrong move. True means white
         /// </summary>
-        public Action<EndGameReason, bool> Resigned { get; set; }
+        public Action<GameStatistic> Resigned { get; set; }
         public Action<IEnumerable<string>> BoardUpdated { get; set; }
+        public bool GenerateSgfFile { get; set; }
+        public bool GenerateLatBoard { get; set; }
 
 
         #region IDisposable pattern
@@ -190,4 +221,14 @@ namespace GoTournament
     }
 
     public enum EndGameReason { None, MoveTimeOut, Resign, InvalidMove, ConsecutivePass }
+
+    public class GameStatistic
+    {
+        public EndGameReason EndReason { get; set; }
+        public string WinnerName { get; set; }
+        public int TotalMoves { get; set; }
+        public string FinalBoard { get; set; }
+        public bool WhiteFinishedGame { get; set; }
+        public string GameFinisherName { get; set; }
+    }
 }

@@ -40,9 +40,10 @@ namespace GoTournament
             };*/
 
 
-            adjudicator.Resigned = (reason, b) =>
+            adjudicator.Resigned = (stat) =>
             {
-                EndGame(reason, b ? white.Name : black.Name);
+                stat.GameFinisherName = stat.WhiteFinishedGame ? white.Name : black.Name;
+                EndGame(stat);
                 IsFinished = true;
             };
            
@@ -58,6 +59,6 @@ namespace GoTournament
 
         public bool IsFinished { get; private set; }
         
-        public Action<EndGameReason, string> EndGame { get; set; }
+        public Action<GameStatistic> EndGame { get; set; }
     }
 }

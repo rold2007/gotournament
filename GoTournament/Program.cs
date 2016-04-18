@@ -25,18 +25,18 @@ namespace GoTournament
 
         private static void RunBotRunner()
         {
-            var size = 4;
+            var size = 8;
             var finished = false;
             var sync = new object();
             var botWhite = new GnuGoBot("WhiteBot")
             {
                 BoardSize = size,
-                Level = 10
+                Level = 1
             };
             var botBlack = new GnuGoBot("BlackBot")
             {
                 BoardSize = size,
-                Level = 1
+                Level = 10
             };
             var judge = new Adjudicator(size)
             {
@@ -53,7 +53,7 @@ namespace GoTournament
                         }
                         Console.WriteLine("------------------------------------------");
                     }
-                }
+                }, GenerateSgfFile = true
             };
             IBotRunner botRunner = null;
 
@@ -62,12 +62,12 @@ namespace GoTournament
             {
                 botRunner = new BotRunner(judge,botBlack, botWhite)
                 {
-                    EndGame = (reason, s) =>
+                    EndGame = stat =>
                     {
                         lock (sync)
                         {
                             finished = true;
-                            Console.WriteLine("Games is over by bot '{0}' with the reason: {1}", s, reason.ToString());
+                            Console.WriteLine("Games is over by bot '{0}' with the reason: {1}. Total moves: {2}", stat.GameFinisherName, stat.EndReason, stat.TotalMoves);
                         }
                     }
                 };
