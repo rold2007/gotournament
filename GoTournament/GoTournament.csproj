@@ -46,6 +46,7 @@
     <Compile Include="Adjudicator.cs" />
     <Compile Include="BotRunner.cs" />
     <Compile Include="FileService.cs" />
+    <Compile Include="GameStatistic.cs" />
     <Compile Include="GnuGoBot.cs" />
     <Compile Include="Interface\IAdjudicator.cs" />
     <Compile Include="Interface\IFileService.cs" />
