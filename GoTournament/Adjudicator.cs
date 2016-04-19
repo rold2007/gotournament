@@ -23,7 +23,8 @@ namespace GoTournament
         private bool _lastInputMoveIsPass;
         private Move _lastReceivedMove;
         private int _movesCount;
-        private static TaskCompletionSource<bool> _tcs;
+        private static TaskCompletionSource<IEnumerable<string>> _taskBoard;
+        private static TaskCompletionSource<string> _taskScore;
 
 
         #region Ctors
@@ -120,6 +121,12 @@ namespace GoTournament
                     PushValidationResult();
                 }
             }
+            if (_taskScore != null && (line.StartsWith("= W+") ||(line.StartsWith("= B+"))))
+            {
+                _taskScore.SetResult(line.Trim('=', ' '));
+                _taskScore = null;
+                return;
+            }
 
             if (_waitingForShowBoard)
             {
@@ -142,8 +149,8 @@ namespace GoTournament
                     _waitingForShowBoard = false;
                     if (BoardUpdated != null)
                         BoardUpdated(_boardParts);
-                    if (_tcs != null)
-                        _tcs.SetResult(true);
+                    if (_taskBoard != null)
+                        _taskBoard.SetResult(_boardParts);
                 }
             }
             _boardParts.Add(line);
@@ -161,18 +168,36 @@ namespace GoTournament
 
         private async void RaiseResigned(EndGameReason reason, bool whiteFinishedGame)
         {
+            var statistic = new GameStatistic
+            {
+                EndReason = reason,
+                TotalMoves = _movesCount,
+                WhiteFinishedGame = whiteFinishedGame
+            };
             if (GenerateSgfFile)
-                _process.WriteData("printsgf trace{0}.sgf", DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
-            var board = GenerateLatBoard ? await GetLastBoard() : string.Empty;
-            Resigned(new GameStatistic { EndReason = reason, TotalMoves = _movesCount, WhiteFinishedGame = whiteFinishedGame, FinalBoard = board });
+            {
+                var fileName = string.Format("trace{0}.sgf", DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
+                _process.WriteData("printsgf " + fileName);
+                statistic.SgfFileName = fileName;
+            }
+            if (GenerateLatBoard)
+                statistic.FinalBoard = GetLastBoard().Result;
+            statistic.FinalScore = await GetFinalScore();
+            Resigned(statistic);
+        }
+
+        private async Task<string> GetFinalScore()
+        {
+            _taskScore = new TaskCompletionSource<string>();
+            _process.WriteData("final_score");
+            return await _taskScore.Task;
         }
 
         private async Task<string> GetLastBoard()
         {
-            _tcs = new TaskCompletionSource<bool>();
+            _taskBoard = new TaskCompletionSource<IEnumerable<string>>();
             UpdateBoard();
-            await _tcs.Task;
-            return string.Join("\n", _boardParts);
+            return string.Join("\n", await _taskBoard.Task);
         }
 
         public Action<Move> WhiteMoveValidated { get; set; }

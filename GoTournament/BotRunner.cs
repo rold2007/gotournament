@@ -43,6 +43,7 @@ namespace GoTournament
             adjudicator.Resigned = (stat) =>
             {
                 stat.GameFinisherName = stat.WhiteFinishedGame ? white.Name : black.Name;
+                stat.GameWinnerName = stat.WhiteWonTheGame ? white.Name : black.Name;
                 EndGame(stat);
                 IsFinished = true;
             };
