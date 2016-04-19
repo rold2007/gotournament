@@ -55,8 +55,8 @@ namespace GoTournament.Benchmark
         private static void OnTestFinised(GameStatistic stat)
         {
             Watch.Stop();
-            Console.WriteLine("Game duration: {0}\nReason of the game finish: {1}",
-                string.Format("{0:D2}m:{1:D2}s:{2:D3}ms", Watch.Elapsed.Minutes, Watch.Elapsed.Seconds, Watch.Elapsed.Milliseconds) , stat.EndReason);
+            Console.WriteLine("Game duration: {0}\nReason of the game finish: {1}\nFinal score is: {2}",
+                string.Format("{0:D2}m:{1:D2}s:{2:D3}ms", Watch.Elapsed.Minutes, Watch.Elapsed.Seconds, Watch.Elapsed.Milliseconds) , stat.EndReason, stat.FinalScore);
             Console.WriteLine(stat.FinalBoard);
             _tcs.SetResult(true);
         }

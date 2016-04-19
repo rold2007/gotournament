@@ -67,7 +67,7 @@ namespace GoTournament
                         lock (sync)
                         {
                             finished = true;
-                            Console.WriteLine("Games is over by bot '{0}' with the reason: {1}. Total moves: {2}", stat.GameFinisherName, stat.EndReason, stat.TotalMoves);
+                            Console.WriteLine("Bot '{0}' won the game with the score: {1}. Total moves: {2}", stat.GameWinnerName, stat.Score, stat.TotalMoves);
                         }
                     }
                 };
