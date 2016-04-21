@@ -10,8 +10,8 @@ namespace GoTournament.Interface
         Action<Move> WhiteMoveValidated { get; set; }
         Action<Move> BlackMoveValidated { get; set; }
         Action<IEnumerable<string>> BoardUpdated { get; set; }
-        Action<GameStatistic> Resigned { get; set; }
-        bool GenerateSgfFile { get; set; }
-        bool GenerateLatBoard { get; set; }
+        Action<GameResult> Resigned { get; set; }
+        bool SaveGameResults { get; set; }
+        bool GenerateLastBoard { get; set; }
     }
 }
