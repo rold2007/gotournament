@@ -26,9 +26,9 @@ namespace GoTournament.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\Jurii\\Desktop\\GO\\gnugo-3.8\\gnugo.exe")]
-        public string gnuBotPath {
+        public string adjudicatorPath {
             get {
-                return ((string)(this["gnuBotPath"]));
+                return ((string)(this["adjudicatorPath"]));
             }
         }
     }

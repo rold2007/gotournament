@@ -18,7 +18,7 @@ namespace GoTournament
             if(black.Name == white.Name) throw new NotSupportedException("Give unique names to the bot instances. Be creative.");
 
             _bots = new List<IDisposable> { black, white, adjudicator };
-
+            
             EndGame = delegate { };
               black.MovePerformed = adjudicator.BlackMoves;
               white.MovePerformed = adjudicator.WhiteMoves;
@@ -40,10 +40,8 @@ namespace GoTournament
             };*/
 
 
-            adjudicator.Resigned = (stat) =>
+            adjudicator.Resigned = stat =>
             {
-                stat.GameFinisherName = stat.WhiteFinishedGame ? white.Name : black.Name;
-                stat.GameWinnerName = stat.WhiteWonTheGame ? white.Name : black.Name;
                 EndGame(stat);
                 IsFinished = true;
             };
@@ -60,6 +58,6 @@ namespace GoTournament
 
         public bool IsFinished { get; private set; }
         
-        public Action<GameStatistic> EndGame { get; set; }
+        public Action<GameResult> EndGame { get; set; }
     }
 }

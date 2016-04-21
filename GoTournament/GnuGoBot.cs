@@ -36,7 +36,8 @@ namespace GoTournament
 
         public GnuGoBot(string binaryPath, string name) : this(binaryPath, name, new FileService()) { }
 
-        public GnuGoBot(string name): this(Properties.Settings.Default.gnuBotPath, name) { }
+        [Obsolete]
+        public GnuGoBot(string name): this(Properties.Settings.Default.adjudicatorPath, name) { }
 
         #endregion
 

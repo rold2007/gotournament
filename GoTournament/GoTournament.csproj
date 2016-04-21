@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,14 +49,19 @@
   <ItemGroup>
     <Compile Include="Adjudicator.cs" />
     <Compile Include="BotRunner.cs" />
-    <Compile Include="FileService.cs" />
-    <Compile Include="GameStatistic.cs" />
+    <Compile Include="Model\BotInstance.cs" />
+    <Compile Include="Model\Tournament.cs" />
+    <Compile Include="Service\ConfigurationService.cs" />
+    <Compile Include="Service\FileService.cs" />
+    <Compile Include="Model\GameResult.cs" />
     <Compile Include="GnuGoBot.cs" />
+    <Compile Include="Interface\IConfigurationService.cs" />
     <Compile Include="Interface\IAdjudicator.cs" />
     <Compile Include="Interface\IFileService.cs" />
     <Compile Include="Interface\IBotRunner.cs" />
     <Compile Include="Interface\IGoBot.cs" />
     <Compile Include="Interface\IProcessWrapper.cs" />
+    <Compile Include="Model\BotKind.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="ProcessWrapper.cs" />
     <Compile Include="Program.cs" />
@@ -62,9 +71,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Interface\IJsonService.cs" />
+    <Compile Include="Service\JsonService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

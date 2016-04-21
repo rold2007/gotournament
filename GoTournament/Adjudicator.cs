@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using GoTournament.Interface;
+using GoTournament.Model;
 
 namespace GoTournament
 {
@@ -23,20 +25,25 @@ namespace GoTournament
         private bool _lastInputMoveIsPass;
         private Move _lastReceivedMove;
         private int _movesCount;
-        private static TaskCompletionSource<IEnumerable<string>> _taskBoard;
-        private static TaskCompletionSource<string> _taskScore;
+        private TaskCompletionSource<IEnumerable<string>> _taskBoard;
+        private TaskCompletionSource<string> _taskScore;
+        private readonly Tournament _tournament;
+        private readonly IFileService _fileService;
 
 
         #region Ctors
 
-        public Adjudicator(string binaryPath, int boardsize, IFileService fileService)
+        public Adjudicator(string binaryPath, Tournament tournament, IFileService fileService)
         {
             if (!fileService.FileExists(binaryPath))
                 throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
             _process = new ProcessWrapper(binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
-            if (boardsize != 19)
+            _tournament = tournament;
+            _fileService = fileService;
+            _tournament = tournament;
+            if (_tournament.BoardSize != 19)
             {
-                _process.WriteData("boardsize {0}", boardsize);
+                _process.WriteData("boardsize {0}", _tournament.BoardSize);
             }
             WhiteMoveValidated = delegate { };
             BlackMoveValidated = delegate { };
@@ -50,10 +57,8 @@ namespace GoTournament
             _process.WriteData("showboard");
         }
 
-        public Adjudicator(string binaryPath, int boardsize) : this(binaryPath, boardsize, new FileService()) { }
-        public Adjudicator(string binaryPath) : this(binaryPath, 19, new FileService()) { }
-        public Adjudicator(int boardsize) : this(Properties.Settings.Default.gnuBotPath, boardsize) { }
-        public Adjudicator() : this(Properties.Settings.Default.gnuBotPath, 19) { }
+        public Adjudicator(string binaryPath, Tournament tournament) : this(binaryPath, tournament, new FileService()) { }
+        public Adjudicator(Tournament tournament) : this(Properties.Settings.Default.adjudicatorPath, tournament) { }
 
 
         #endregion
@@ -121,7 +126,7 @@ namespace GoTournament
                     PushValidationResult();
                 }
             }
-            if (_taskScore != null && (line.StartsWith("= W+") ||(line.StartsWith("= B+"))))
+            if (_taskScore != null && (line.StartsWith("= W+") || (line.StartsWith("= B+"))))
             {
                 _taskScore.SetResult(line.Trim('=', ' '));
                 _taskScore = null;
@@ -166,31 +171,62 @@ namespace GoTournament
                 UpdateBoard();
         }
 
-        private async void RaiseResigned(EndGameReason reason, bool whiteFinishedGame)
+        private void RaiseResigned(EndGameReason reason, bool whiteFinishedGame)
         {
-            var statistic = new GameStatistic
+            var statistic = new GameResult
             {
                 EndReason = reason,
                 TotalMoves = _movesCount,
-                WhiteFinishedGame = whiteFinishedGame
+                BoardSize = _tournament.BoardSize
             };
-            if (GenerateSgfFile)
+            if (reason == EndGameReason.Resign)
             {
-                var fileName = string.Format("trace{0}.sgf", DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
-                _process.WriteData("printsgf " + fileName);
-                statistic.SgfFileName = fileName;
+                statistic.WinnerName = whiteFinishedGame ? _tournament.BlackBot : _tournament.WhiteBot;
+                statistic.LooserName = !whiteFinishedGame ? _tournament.BlackBot : _tournament.WhiteBot;
             }
-            if (GenerateLatBoard)
+            else
+            {
+                var score = GetFinalScore().Result;
+                statistic.FinalScore = score.Item1;
+                if (score.Item2 == Color.White)
+                {
+                    statistic.WinnerName = _tournament.WhiteBot;
+                    statistic.LooserName = _tournament.BlackBot;
+                }
+                else if (score.Item2 == Color.Black)
+                {
+                    statistic.WinnerName = _tournament.BlackBot;
+                    statistic.LooserName = _tournament.WhiteBot;
+                }
+            }
+            if (GenerateLastBoard)
                 statistic.FinalBoard = GetLastBoard().Result;
-            statistic.FinalScore = await GetFinalScore();
+            if (SaveGameResults)
+            {
+                var fileName = string.Format("{0}{1}", _tournament.Name, DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
+                _process.WriteData("printsgf " + fileName + ".sgf");
+                statistic.ResultsFileName = fileName;
+                _fileService.SerializeGameResult(statistic, fileName);
+            }
             Resigned(statistic);
         }
 
-        private async Task<string> GetFinalScore()
+        private async Task<Tuple<int, Color>> GetFinalScore()
         {
             _taskScore = new TaskCompletionSource<string>();
             _process.WriteData("final_score");
-            return await _taskScore.Task;
+            var scoreLine = await _taskScore.Task;
+            var score = 0;
+            if (!int.TryParse(scoreLine.Substring(2), NumberStyles.AllowDecimalPoint, new NumberFormatInfo { NumberDecimalSeparator = "." }, out score))
+                Debug.WriteLine("WARNING: could not parse final score: {0}", scoreLine);
+            Color color = Color.None;
+            if (scoreLine.StartsWith("W"))
+                color = Color.White;
+            else if (scoreLine.StartsWith("B"))
+                color = Color.Black;
+            return Tuple.Create(score, color);
+
+
         }
 
         private async Task<string> GetLastBoard()
@@ -205,12 +241,11 @@ namespace GoTournament
         /// <summary>
         /// Resign because of wrong move. True means white
         /// </summary>
-        public Action<GameStatistic> Resigned { get; set; }
+        public Action<GameResult> Resigned { get; set; }
         public Action<IEnumerable<string>> BoardUpdated { get; set; }
-        public bool GenerateSgfFile { get; set; }
-        public bool GenerateLatBoard { get; set; }
-
-
+        public bool SaveGameResults { get; set; }
+        public bool GenerateLastBoard { get; set; }
+        
         #region IDisposable pattern
 
         public void Dispose()

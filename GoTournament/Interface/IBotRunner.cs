@@ -4,7 +4,7 @@ namespace GoTournament.Interface
 {
     public interface IBotRunner
     {
-        Action<GameStatistic> EndGame { get; set; }
+        Action<GameResult> EndGame { get; set; }
         bool IsFinished { get; }
         void Cancel();
     }
