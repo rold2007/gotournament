@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Adjudicator.cs" />
     <Compile Include="BotRunner.cs" />
+    <Compile Include="Interface\ITournamentInitializer.cs" />
     <Compile Include="Model\BotInstance.cs" />
     <Compile Include="Model\Tournament.cs" />
     <Compile Include="Service\ConfigurationService.cs" />
@@ -73,6 +74,7 @@
     </Compile>
     <Compile Include="Interface\IJsonService.cs" />
     <Compile Include="Service\JsonService.cs" />
+    <Compile Include="TournamentInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
