@@ -11,36 +11,36 @@ namespace GoTournament
 {
     public class TournamentInitializer : ITournamentInitializer
     {
-        private readonly string _name;
-        private readonly string _gamesCount;
-        private readonly IConfigurationService _configurationService;
-        private TaskCompletionSource<GameResult> _taskResult;
-        List<GameResult> _results = new List<GameResult>();
+        public readonly string Name;
+        private readonly string gamesCount;
+        private readonly IConfigurationReader configurationReader;
+        private TaskCompletionSource<GameResult> taskResult;
+        private readonly List<GameResult> results = new List<GameResult>();
 
-        public TournamentInitializer(string name, string gamesCount, IConfigurationService configurationService)
+        public TournamentInitializer(string name, string gamesCount, ConfigurationReader configurationReader)
         {
-            if (configurationService == null) throw new ArgumentNullException(nameof(configurationService));
-            _name = name;
-            _gamesCount = gamesCount;
-            _configurationService = configurationService;
+            if (configurationReader == null) throw new ArgumentNullException(nameof(configurationReader));
+            this.Name = name;
+            this.gamesCount = gamesCount;
+            this.configurationReader = configurationReader;
         }
 
-        public TournamentInitializer(string name, string gamesCount) : this(name, gamesCount, new ConfigurationService()) { }
+        public TournamentInitializer(string name, string gamesCount) : this(name, gamesCount, new ConfigurationReader()) { }
 
         public async void Run()
         {
-            var scenario = _configurationService.ReadTournament(_name);
+            var scenario = this.configurationReader.ReadTournament(this.Name);
             int count;
-            if (int.TryParse(_gamesCount, out count))
+            if (int.TryParse(this.gamesCount, out count))
                 scenario.GamesCount = count;
-            var blackInstance = _configurationService.ReadBotInstance(scenario.BlackBot);
-            var whiteInstance = _configurationService.ReadBotInstance(scenario.WhiteBot);
-            BotKind blackKind = _configurationService.ReadBotKind(blackInstance.Kind);
-            BotKind whiteKind = _configurationService.ReadBotKind(whiteInstance.Kind);
+            var blackInstance = this.configurationReader.ReadBotInstance(scenario.BlackBot);
+            var whiteInstance = this.configurationReader.ReadBotInstance(scenario.WhiteBot);
+            BotKind blackKind = this.configurationReader.ReadBotKind(blackInstance.Kind);
+            BotKind whiteKind = this.configurationReader.ReadBotKind(whiteInstance.Kind);
 
             for (var i = 0; i < scenario.GamesCount; i++)
             {
-                _taskResult = new TaskCompletionSource<GameResult>();
+                this.taskResult = new TaskCompletionSource<GameResult>();
                 IGoBot blackBot = GetInstance(blackKind, blackInstance.Name);
                 IGoBot whiteBot = GetInstance(whiteKind, whiteInstance.Name);
                 blackBot.BoardSize = scenario.BoardSize;
@@ -49,7 +49,7 @@ namespace GoTournament
                 whiteBot.Level = whiteInstance.Level;
 
                 RunBotRunner(blackBot, whiteBot, scenario);
-                OutputStatistic(await _taskResult.Task, blackInstance.Name, whiteInstance.Name);
+                OutputStatistic(await this.taskResult.Task, blackInstance.Name, whiteInstance.Name);
             }
 
 
@@ -57,9 +57,9 @@ namespace GoTournament
 
         private void OutputStatistic(GameResult gameResult, string blackName, string whiteName)
         {
-            _results.Add(gameResult);
-            Console.WriteLine("Bot \"{0}\" won {1} time(s)", blackName, _results.Count(r => r.WinnerName == blackName));
-            Console.WriteLine("Bot \"{0}\" won {1} time(s)", whiteName, _results.Count(r => r.WinnerName == whiteName));
+            this.results.Add(gameResult);
+            Console.WriteLine("Bot \"{0}\" won {1} time(s)", blackName, this.results.Count(r => r.WinnerName == blackName));
+            Console.WriteLine("Bot \"{0}\" won {1} time(s)", whiteName, this.results.Count(r => r.WinnerName == whiteName));
         }
 
         private IGoBot GetInstance(BotKind kind, string botInstanceName)
@@ -111,7 +111,7 @@ namespace GoTournament
                         {
                             //  finished = true;
                             Console.WriteLine("Bot '{0}' won the game with the score: {1}. Total moves: {2}", stat.WinnerName, stat.FinalScore, stat.TotalMoves);
-                            _taskResult.SetResult(stat);
+                            this.taskResult.SetResult(stat);
                         }
                     }
                 };
