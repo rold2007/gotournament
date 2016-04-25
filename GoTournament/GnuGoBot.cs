@@ -8,18 +8,20 @@ using GoTournament.Interface;
 
 namespace GoTournament
 {
+    using GoTournament.Service;
+
     public class GnuGoBot : IGoBot
     {
         #region Fields
 
-        private IProcessWrapper _process;
-        private readonly string _binaryPath;
-        private int _boardSize = 19;
-        private bool _black;
-        private string _genmoveCommand;
-        private bool _disposed;
-        private int _level;
-        private bool _waitingForMoveGenerating;
+        private IProcessWrapper process;
+        private readonly string binaryPath;
+        private int boardSize = 19;
+        private bool black;
+        private string genmoveCommand;
+        private bool disposed;
+        private int level;
+        private bool waitingForMoveGenerating;
         #endregion
 
         #region Ctors
@@ -28,7 +30,7 @@ namespace GoTournament
         {
             if (!fileService.FileExists(binaryPath))
                 throw new FileNotFoundException("Bot binnary not found,", binaryPath);
-            _binaryPath = binaryPath;
+            this.binaryPath = binaryPath;
             Name = name;
             //To reduce null reference checking 
             MovePerformed = delegate { };
@@ -45,25 +47,25 @@ namespace GoTournament
 
         public int BoardSize
         {
-            get { return _boardSize; }
+            get { return this.boardSize; }
             set
             {
-                if (_process != null)
+                if (this.process != null)
                     throw new NotSupportedException("Board size could be set only before start of the game");
                 if (value > 19 || value < 1)
                     throw new NotSupportedException("Board size could be from 1 to 19");
-                _boardSize = value;
+                this.boardSize = value;
             }
         }
 
         public int Level
         {
-            get { return _level; }
+            get { return this.level; }
             set
             {
-                if (_process != null)
+                if (this.process != null)
                     throw new NotSupportedException("Level could be set only before start of the game");
-                _level = value;
+                this.level = value;
             }
         }
 
@@ -77,20 +79,20 @@ namespace GoTournament
 
         public void StartGame(bool goesFirst)
         {
-            _black = goesFirst;
-            _genmoveCommand = _black ? "genmove black" : "genmove white";
-            _process = new ProcessWrapper(_binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
+            this.black = goesFirst;
+            this.genmoveCommand = this.black ? "genmove black" : "genmove white";
+            this.process = new ProcessWrapper(this.binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
             InitializeGame();
-            if (_black)
+            if (this.black)
                 PerformMove();
         }
 
         public void PlaceMove(Move move)
         {
             if (move == null) throw new ArgumentNullException(nameof(move));
-            if (_process == null) throw new ObjectDisposedException("proccess");
+            if (this.process == null) throw new ObjectDisposedException("proccess");
 
-            _process.WriteData((_black ? "white " : "black ") + move);
+            this.process.WriteData((this.black ? "white " : "black ") + move);
             PerformMove();
         }
 
@@ -103,28 +105,28 @@ namespace GoTournament
             //debug
             //  File.AppendAllText(Name+".txt", string.Format("{0}|{1}|{2}", DateTime.Now.ToString("h:mm:ss.ff"), s, Environment.NewLine));
 
-            if (!_waitingForMoveGenerating) return;
+            if (!this.waitingForMoveGenerating) return;
             if (s == null) return;
             var move = Move.Parse(s);
             if (move != null)
             {
                 MovePerformed(move);
-                _waitingForMoveGenerating = false;
+                this.waitingForMoveGenerating = false;
             }
 
         }
 
         private void PerformMove()
         {
-            _waitingForMoveGenerating = true;
-            _process.WriteData(_genmoveCommand);
+            this.waitingForMoveGenerating = true;
+            this.process.WriteData(this.genmoveCommand);
         }
 
         private void InitializeGame()
         {
-            if (_boardSize != 19)
-                _process.WriteData("boardsize {0}", _boardSize);
-            _process.WriteData("level {0}", _level);
+            if (this.boardSize != 19)
+                this.process.WriteData("boardsize {0}", this.boardSize);
+            this.process.WriteData("level {0}", this.level);
         }
 
         #endregion
@@ -139,18 +141,18 @@ namespace GoTournament
 
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!this.disposed)
             {
                 if (disposing)
                 {
-                    if (_process != null)
+                    if (this.process != null)
                     {
-                        _process.WriteData("quit");
-                        _process.Dispose();
-                        _process = null;
+                        this.process.WriteData("quit");
+                        this.process.Dispose();
+                        this.process = null;
                     }
                 }
-                _disposed = true;
+                this.disposed = true;
             }
         }
 

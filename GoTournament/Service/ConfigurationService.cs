@@ -1,32 +1,43 @@
-﻿using GoTournament.Interface;
-using GoTournament.Model;
-
 namespace GoTournament.Service
 {
+    using System.IO;
+    using System.Reflection;
+
+    using GoTournament.Interface;
+
     public class ConfigurationService : IConfigurationService
     {
-        private readonly IFileService _fileService;
+        private readonly string currentDirectoryPath;
 
-        public ConfigurationService(IFileService fileService)
+        private readonly IJsonService jsonService;
+
+        private readonly IFileService fileService;
+
+        public ConfigurationService(IJsonService jsonService, IFileService fileService)
         {
-            _fileService = fileService;
+            this.jsonService = jsonService;
+            this.fileService = fileService;
+            this.currentDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
-        public ConfigurationService(): this(new FileService()) { }
+        public ConfigurationService() : this(new JsonService(), new FileService()) { }
 
-        public Tournament ReadTournament(string name)
+        public void SerializeGameResult(GameResult result, string fileName)
         {
-            return _fileService.ReadConfig<Tournament>("Tournament\\" + name);
+            this.fileService.FileWriteAllText(this.GetAbsolutePath(fileName), this.jsonService.SerializeObject(result));
         }
 
-        public BotInstance ReadBotInstance(string name)
+        public T ReadConfig<T>(string relativePath)
         {
-            return _fileService.ReadConfig<BotInstance>("BotInstance\\" + name);
+            var absolutePath = this.GetAbsolutePath(relativePath);
+            if (!this.fileService.FileExists(absolutePath))
+                throw new FileNotFoundException("Could not found file", absolutePath);
+            return this.jsonService.DeserializeObject<T>(this.fileService.FileReadAllText(absolutePath));
         }
 
-        public BotKind ReadBotKind(string name)
+        private string GetAbsolutePath(string relativePath)
         {
-            return _fileService.ReadConfig<BotKind>("BotKind\\" + name);
+            return Path.Combine(this.currentDirectoryPath, relativePath + ".json");
         }
     }
 }

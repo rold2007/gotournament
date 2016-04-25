@@ -6,15 +6,15 @@ namespace GoTournament
 {
     public class ProcessWrapper : IDisposable, IProcessWrapper
     {
-        private readonly string _binnaryPath;
-        private readonly string _arguments;
-        private bool _disposed;
-        private Process _process;
+        private readonly string binnaryPath;
+        private readonly string arguments;
+        private bool disposed;
+        private Process process;
 
         public ProcessWrapper(string binnaryPath, string arguments)
         {
-            _binnaryPath = binnaryPath;
-            _arguments = arguments;
+            this.binnaryPath = binnaryPath;
+            this.arguments = arguments;
             CreateProccess();
         }
 
@@ -22,43 +22,43 @@ namespace GoTournament
 
         public void WriteData(string data)
         {
-            _process.StandardInput.WriteLine(data);
+            this.process.StandardInput.WriteLine(data);
         }
 
         public void WriteData(string data, params object[] args)
         {
-            _process.StandardInput.WriteLine(data, args);
+            this.process.StandardInput.WriteLine(data, args);
         }
 
         private void CreateProccess()
         {
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = _binnaryPath,
-                Arguments = _arguments,
+                FileName = this.binnaryPath,
+                Arguments = this.arguments,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
             try
             {
-                _process = Process.Start(processStartInfo);
+                this.process = Process.Start(processStartInfo);
 
-                if (_process != null)
+                if (this.process != null)
                 {
-                    _process.OutputDataReceived += _process_OutputDataReceived;
-                    _process.BeginOutputReadLine();
+                    this.process.OutputDataReceived += this.ProcessOutputDataReceived;
+                    this.process.BeginOutputReadLine();
                 }
             }
             catch (Exception ex)
             {
-                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}", _binnaryPath, _arguments), new[] {ex});
+                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}", this.binnaryPath, this.arguments), new[] {ex});
             }
         }
 
-        private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void ProcessOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            if (_disposed) return;
+            if (this.disposed) return;
             if (DataReceived != null)
                 DataReceived(e.Data);
         }
@@ -72,17 +72,17 @@ namespace GoTournament
 
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!this.disposed)
             {
                 if (disposing)
                 {
-                    if (_process != null)
+                    if (this.process != null)
                     {
-                        _process.Dispose();
-                        _process = null;
+                        this.process.Dispose();
+                        this.process = null;
                     }
                 }
-                _disposed = true;
+                this.disposed = true;
             }
         }
 

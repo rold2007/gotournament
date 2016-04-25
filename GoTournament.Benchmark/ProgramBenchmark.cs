@@ -13,7 +13,7 @@ namespace GoTournament.Benchmark
     class ProgramBenchmark
     {
         private static readonly Stopwatch Watch = new Stopwatch();
-        private static TaskCompletionSource<bool> _tcs = new TaskCompletionSource<bool>();
+        private static TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
         static void Main()
         {
@@ -43,7 +43,7 @@ namespace GoTournament.Benchmark
         {
             Console.WriteLine("____________________________________");
             Console.WriteLine("Board size: {0}, bot #1 strength : {1}, bot #2 strength: {2}", settings.BoardSize, settings.FirstBotLevel, settings.SecondBotLevel);
-            _tcs = new TaskCompletionSource<bool>();
+            tcs = new TaskCompletionSource<bool>();
             Watch.Restart();
             var botWhite = new GnuGoBot("WhiteBot") { BoardSize = settings.BoardSize, Level = settings.FirstBotLevel };
             var botBlack = new GnuGoBot("BlackBot") { BoardSize = settings.BoardSize, Level = settings.SecondBotLevel };
@@ -56,7 +56,7 @@ namespace GoTournament.Benchmark
                     Name = "Benchmarking"
                 }) { SaveGameResults = true, GenerateLastBoard = true };
             var runner = new BotRunner(judge, botBlack, botWhite) { EndGame = OnTestFinised };
-            await _tcs.Task;
+            await tcs.Task;
             runner.Cancel();
         }
 
@@ -66,7 +66,7 @@ namespace GoTournament.Benchmark
             Console.WriteLine("Game duration: {0}\nReason of the game finish: {1}\nFinal score is: {2}",
                 string.Format("{0:D2}m:{1:D2}s:{2:D3}ms", Watch.Elapsed.Minutes, Watch.Elapsed.Seconds, Watch.Elapsed.Milliseconds), stat.EndReason, stat.FinalScore);
             Console.WriteLine(stat.FinalBoard);
-            _tcs.SetResult(true);
+            tcs.SetResult(true);
         }
     }
 }
