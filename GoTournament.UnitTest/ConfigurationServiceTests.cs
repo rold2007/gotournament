@@ -1,14 +1,13 @@
+using System;
+using System.IO;
 using GoTournament.Interface;
 using GoTournament.Service;
+using GoTournament.Model;
 using Moq;
 using Xunit;
 
 namespace GoTournament.UnitTest
 {
-    using System;
-    using System.IO;
-
-    using GoTournament.Model;
 
     public class ConfigurationServiceTests
     {
@@ -68,16 +67,17 @@ namespace GoTournament.UnitTest
             fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
             string filePath = null;
             string fileContent = null;
-            fileService.Setup(s => s.FileReadAllText(It.IsAny<string>())).Callback<string>(s=>filePath =s).Returns(() => "<CONFIGS>");
-            jsonService.Setup(s => s.DeserializeObject<BotKind>(It.IsAny<string>())).Callback<string>(s=> fileContent = s)
+            fileService.Setup(s => s.FileReadAllText(It.IsAny<string>())).Callback<string>(s => filePath = s).Returns(() => "<CONFIGS>");
+            jsonService.Setup(s => s.DeserializeObject<BotKind>(It.IsAny<string>())).Callback<string>(s => fileContent = s)
                 .Returns(new BotKind { Name = "teeest" });
             var result = configurationService.ReadConfig<BotKind>("tree");
             Assert.IsType(typeof(BotKind), result);
-            Assert.True(result.Name== "teeest");
+            Assert.True(result.Name == "teeest");
             Assert.Equal("<CONFIGS>", fileContent);
             Assert.True(filePath.EndsWith("tree.json"));
             jsonService.VerifyAll();
             fileService.VerifyAll();
         }
+
     }
 }

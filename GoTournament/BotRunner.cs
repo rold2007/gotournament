@@ -19,7 +19,7 @@ namespace GoTournament
 
             this.bots = new List<IDisposable> { black, white, adjudicator };
 
-            EndGame = delegate { };
+            this.EndGame = delegate { };
             black.MovePerformed = adjudicator.BlackMoves;
             white.MovePerformed = adjudicator.WhiteMoves;
             adjudicator.BlackMoveValidated = white.PlaceMove;
@@ -42,8 +42,8 @@ namespace GoTournament
 
             adjudicator.Resigned = stat =>
             {
-                EndGame(stat);
-                IsFinished = true;
+                this.EndGame(stat);
+                this.IsFinished = true;
             };
 
             white.StartGame(false);

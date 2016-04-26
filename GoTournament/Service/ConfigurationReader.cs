@@ -3,30 +3,35 @@ using GoTournament.Model;
 
 namespace GoTournament.Service
 {
+    using System;
+
     public class ConfigurationReader : IConfigurationReader
     {
-        private readonly IConfigurationService fileService;
+        private readonly IConfigurationService configurationService;
 
-        public ConfigurationReader(IConfigurationService fileService)
+        public ConfigurationReader(IConfigurationService configurationService)
         {
-            this.fileService = fileService;
+            if (configurationService == null)
+                throw new ArgumentNullException(nameof(configurationService));
+            
+            this.configurationService = configurationService;
         }
 
         public ConfigurationReader(): this(new ConfigurationService()) { }
 
         public Tournament ReadTournament(string name)
         {
-            return this.fileService.ReadConfig<Tournament>("Tournament\\" + name);
+            return this.configurationService.ReadConfig<Tournament>("Tournament\\" + name);
         }
 
         public BotInstance ReadBotInstance(string name)
         {
-            return this.fileService.ReadConfig<BotInstance>("BotInstance\\" + name);
+            return this.configurationService.ReadConfig<BotInstance>("BotInstance\\" + name);
         }
 
         public BotKind ReadBotKind(string name)
         {
-            return this.fileService.ReadConfig<BotKind>("BotKind\\" + name);
+            return this.configurationService.ReadConfig<BotKind>("BotKind\\" + name);
         }
     }
 }
