@@ -62,6 +62,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BotRunnerTests.cs" />
+    <Compile Include="ConfigurationReaderTests.cs" />
     <Compile Include="ConfigurationServiceTests.cs" />
     <Compile Include="FileServiceTests.cs" />
     <Compile Include="JsonServiceTests.cs" />

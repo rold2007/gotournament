@@ -32,14 +32,18 @@ namespace GoTournament
 
         #region Ctors
 
-        public Adjudicator(string binaryPath, Tournament tournament, IConfigurationService configurationService, IFileService fileService)
+        public Adjudicator(IProcessWrapper processWrapper, Tournament tournament, IConfigurationService configurationService)
         {
-            if (!fileService.FileExists(binaryPath))
-                throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
-            this.process = new ProcessWrapper(binaryPath, "--mode gtp") { DataReceived = OnDataReceived };
+            if (processWrapper == null)
+                throw new ArgumentNullException(nameof(processWrapper));
+            if (tournament == null)
+                throw new ArgumentNullException(nameof(tournament));
+            if (configurationService == null)
+                throw new ArgumentNullException(nameof(configurationService));
+            this.process = processWrapper;
             this.tournament = tournament;
             this.configurationService = configurationService;
-            this.tournament = tournament;
+            this.process.DataReceived = this.OnDataReceived;
             if (this.tournament.BoardSize != 19)
             {
                 this.process.WriteData("boardsize {0}", this.tournament.BoardSize);
@@ -49,16 +53,18 @@ namespace GoTournament
             Resigned = delegate { };
         }
 
-        private void UpdateBoard()
-        {
-            this.waitingForShowBoard = true;
-            this.boardParts.Clear();
-            this.process.WriteData("showboard");
-        }
 
-        public Adjudicator(string binaryPath, Tournament tournament) : this(binaryPath, tournament, new ConfigurationService(), new FileService()) { }
+        public Adjudicator(string binaryPath, Tournament tournament) 
+            : this(CreateIProcessWrapper(binaryPath, new FileService()), tournament, new ConfigurationService()) { }
         public Adjudicator(Tournament tournament) : this(Properties.Settings.Default.adjudicatorPath, tournament) { }
 
+
+        private static IProcessWrapper CreateIProcessWrapper(string binaryPath, IFileService fileService)
+        {
+            if (!fileService.FileExists(binaryPath))
+                throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
+            return new ProcessWrapper(binaryPath, "--mode gtp");
+        }
 
         #endregion
 
@@ -168,6 +174,13 @@ namespace GoTournament
             else BlackMoveValidated(this.lastReceivedMove);
             if (BoardUpdated != null) // If there is no subscription, don't even get this info
                 UpdateBoard();
+        }
+
+        private void UpdateBoard()
+        {
+            this.waitingForShowBoard = true;
+            this.boardParts.Clear();
+            this.process.WriteData("showboard");
         }
 
         private void RaiseResigned(EndGameReason reason, bool whiteFinishedGame)
