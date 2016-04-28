@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 using Xunit;
 using GoTournament.Interface;
 using Moq;
+using System.Security.Cryptography.X509Certificates;
+using GoTournament.Model;
 
 namespace GoTournament.UnitTest
 {
-    using System.Security.Cryptography.X509Certificates;
-
-    using GoTournament.Model;
-
     public class BotRunnerTests
     {
         [Fact]
@@ -101,17 +99,17 @@ namespace GoTournament.UnitTest
             bool? blackStarted = null;
             whiteBot.Setup(s => s.StartGame(It.IsAny<bool>())).Callback<bool>(c => whiteStarted = c);
             blackBot.Setup(s => s.StartGame(It.IsAny<bool>())).Callback<bool>(c => blackStarted = c);
-            
+
             IBotRunner botRunner = new BotRunner(adjudicator, blackBot.Object, whiteBot.Object);
 
             Assert.Equal(false, whiteStarted);
             Assert.Equal(true, blackStarted);
-         
+
             Assert.False(botRunner.IsFinished);
             GameResult gameResult = null;
             botRunner.EndGame = result => gameResult = result;
             Assert.Null(gameResult);
-            adjudicator.Resigned(new GameResult {EndReason = EndGameReason.Resign});
+            adjudicator.Resigned(new GameResult { EndReason = EndGameReason.Resign });
 
             Assert.True(botRunner.IsFinished);
             Assert.NotNull(gameResult);

@@ -4,18 +4,16 @@ using GoTournament.Interface;
 
 namespace GoTournament
 {
-    public class ProcessWrapper : IDisposable, IProcessWrapper
+    public class ProcessWrapper : IProcessWrapper
     {
-        private readonly string binnaryPath;
-        private readonly string arguments;
         private bool disposed;
         private Process process;
 
-        public ProcessWrapper(string binnaryPath, string arguments)
+        public ProcessWrapper(IProcessProxy processProxy, string binnaryPath, string arguments)
         {
-            this.binnaryPath = binnaryPath;
-            this.arguments = arguments;
-            CreateProccess();
+            if (processProxy == null)
+                throw new ArgumentNullException(nameof(processProxy));
+            this.CreateProccess(processProxy, binnaryPath, arguments);
         }
 
         public Action<string> DataReceived { get; set; }
@@ -30,19 +28,19 @@ namespace GoTournament
             this.process.StandardInput.WriteLine(data, args);
         }
 
-        private void CreateProccess()
+        private void CreateProccess(IProcessProxy processProxy, string binnaryPath, string arguments)
         {
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = this.binnaryPath,
-                Arguments = this.arguments,
+                FileName = binnaryPath,
+                Arguments = arguments,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
             try
             {
-                this.process = Process.Start(processStartInfo);
+                this.process = processProxy.Start(processStartInfo);
 
                 if (this.process != null)
                 {
@@ -52,15 +50,14 @@ namespace GoTournament
             }
             catch (Exception ex)
             {
-                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}", this.binnaryPath, this.arguments), new[] {ex});
+                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}", binnaryPath, arguments), new[] {ex});
             }
         }
 
         private void ProcessOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (this.disposed) return;
-            if (DataReceived != null)
-                DataReceived(e.Data);
+            if (this.DataReceived != null) this.DataReceived(e.Data);
         }
 
         #region IDisposable pattern
