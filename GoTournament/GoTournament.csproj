@@ -50,8 +50,10 @@
     <Compile Include="Adjudicator.cs" />
     <Compile Include="BotRunner.cs" />
     <Compile Include="Interface\ITournamentInitializer.cs" />
+    <Compile Include="Interface\IProcessProxy.cs" />
     <Compile Include="Model\BotInstance.cs" />
     <Compile Include="Model\Tournament.cs" />
+    <Compile Include="ProcessProxy.cs" />
     <Compile Include="Service\ConfigurationReader.cs" />
     <Compile Include="Service\ConfigurationService.cs" />
     <Compile Include="Service\FileService.cs" />

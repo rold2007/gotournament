@@ -66,6 +66,7 @@
     <Compile Include="ConfigurationReaderTests.cs" />
     <Compile Include="ConfigurationServiceTests.cs" />
     <Compile Include="FileServiceTests.cs" />
+    <Compile Include="GnuGoBotTests.cs" />
     <Compile Include="JsonServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

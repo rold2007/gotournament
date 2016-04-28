@@ -55,15 +55,17 @@ namespace GoTournament
 
 
         public Adjudicator(string binaryPath, Tournament tournament) 
-            : this(CreateIProcessWrapper(binaryPath, new FileService()), tournament, new ConfigurationService()) { }
+            : this(CreateIProcessWrapper(binaryPath, new FileService(), new ProcessProxy()), tournament, new ConfigurationService()) { }
         public Adjudicator(Tournament tournament) : this(Properties.Settings.Default.adjudicatorPath, tournament) { }
 
 
-        private static IProcessWrapper CreateIProcessWrapper(string binaryPath, IFileService fileService)
+        private static IProcessWrapper CreateIProcessWrapper(string binaryPath, IFileService fileService, IProcessProxy processProxy)
         {
+            if (fileService == null)
+                throw new ArgumentNullException(nameof(fileService));
             if (!fileService.FileExists(binaryPath))
                 throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
-            return new ProcessWrapper(binaryPath, "--mode gtp");
+            return new ProcessWrapper(processProxy, binaryPath, "--mode gtp");
         }
 
         #endregion
