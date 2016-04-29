@@ -1,0 +1,13 @@
+syntax: glob
+*.suo
+GoTournament.Benchmark/bin/*
+GoTournament.Benchmark/obj/*
+GoTournament.UnitTest/bin/*
+GoTournament.UnitTest/obj/*
+*.user
+GoTournament/bin/*
+GoTournament/obj/*
+bin/*
+obj/*
+packages/*
+*.cache
