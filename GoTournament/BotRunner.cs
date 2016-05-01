@@ -5,6 +5,8 @@ using GoTournament.Interface;
 
 namespace GoTournament
 {
+    using GoTournament.Model;
+
     public class BotRunner : IBotRunner
     {
         private readonly List<IDisposable> bots;

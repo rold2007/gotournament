@@ -28,9 +28,9 @@ namespace GoTournament.UnitTest
             reader = new ConfigurationReader(configurationService.Object);
             Assert.NotNull(reader);
             Assert.IsType(typeof(ConfigurationReader), reader);
-            reader = new ConfigurationReader();
+           /* reader = new ConfigurationReader();
             Assert.NotNull(reader);
-            Assert.IsType(typeof(ConfigurationReader), reader);
+            Assert.IsType(typeof(ConfigurationReader), reader);*/
         }
 
         [Fact]

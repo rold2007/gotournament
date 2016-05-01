@@ -27,46 +27,36 @@ namespace GoTournament
         private int movesCount;
         private TaskCompletionSource<IEnumerable<string>> taskBoard;
         private TaskCompletionSource<string> taskScore;
+        
         private readonly Tournament tournament;
         private readonly IConfigurationService configurationService;
 
         #region Ctors
 
-        public Adjudicator(IProcessWrapper processWrapper, Tournament tournament, IConfigurationService configurationService)
+        public Adjudicator(ISimpleInjectorWrapper simpleInjector, Tournament tournament)
         {
-            if (processWrapper == null)
-                throw new ArgumentNullException(nameof(processWrapper));
+            if (simpleInjector == null)
+                throw new ArgumentNullException(nameof(simpleInjector));
             if (tournament == null)
                 throw new ArgumentNullException(nameof(tournament));
-            if (configurationService == null)
-                throw new ArgumentNullException(nameof(configurationService));
-            this.process = processWrapper;
+            var fileService = simpleInjector.GetInstance<IFileService>();
+            this.configurationService = simpleInjector.GetInstance<IConfigurationService>();
+            var binaryPath = this.configurationService.GetAdjudicatorBinnaryPath();
+            if (!fileService.FileExists(binaryPath))
+                throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
+            var processProxy = simpleInjector.GetInstance<IProcessProxy>();
+            this.process = new ProcessWrapper(processProxy, binaryPath, "--mode gtp");
             this.tournament = tournament;
-            this.configurationService = configurationService;
             this.process.DataReceived = this.OnDataReceived;
             if (this.tournament.BoardSize != 19)
             {
                 this.process.WriteData("boardsize {0}", this.tournament.BoardSize);
             }
-            WhiteMoveValidated = delegate { };
-            BlackMoveValidated = delegate { };
-            Resigned = delegate { };
+            this.WhiteMoveValidated = delegate { };
+            this.BlackMoveValidated = delegate { };
+            this.Resigned = delegate { };
         }
-
-
-        public Adjudicator(string binaryPath, Tournament tournament) 
-            : this(CreateIProcessWrapper(binaryPath, new FileService(), new ProcessProxy()), tournament, new ConfigurationService()) { }
-        public Adjudicator(Tournament tournament) : this(Properties.Settings.Default.adjudicatorPath, tournament) { }
-
-
-        private static IProcessWrapper CreateIProcessWrapper(string binaryPath, IFileService fileService, IProcessProxy processProxy)
-        {
-            if (fileService == null)
-                throw new ArgumentNullException(nameof(fileService));
-            if (!fileService.FileExists(binaryPath))
-                throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
-            return new ProcessWrapper(processProxy, binaryPath, "--mode gtp");
-        }
+        
 
         #endregion
 

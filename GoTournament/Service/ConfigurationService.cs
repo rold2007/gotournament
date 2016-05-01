@@ -1,9 +1,10 @@
 namespace GoTournament.Service
 {
+    using System;
     using System.IO;
     using System.Reflection;
-
     using GoTournament.Interface;
+    using GoTournament.Model;
 
     public class ConfigurationService : IConfigurationService
     {
@@ -15,13 +16,15 @@ namespace GoTournament.Service
 
         public ConfigurationService(IJsonService jsonService, IFileService fileService)
         {
+            if (jsonService == null)
+                throw new ArgumentNullException(nameof(jsonService));
+            if (fileService == null)
+                throw new ArgumentNullException(nameof(fileService));
             this.jsonService = jsonService;
             this.fileService = fileService;
             this.currentDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
-
-        public ConfigurationService() : this(new JsonService(), new FileService()) { }
-
+        
         public void SerializeGameResult(GameResult result, string fileName)
         {
             this.fileService.FileWriteAllText(this.GetAbsolutePath(fileName), this.jsonService.SerializeObject(result));
@@ -38,6 +41,11 @@ namespace GoTournament.Service
         private string GetAbsolutePath(string relativePath)
         {
             return Path.Combine(this.currentDirectoryPath, relativePath + ".json");
+        }
+
+        public string GetAdjudicatorBinnaryPath()
+        {
+            return Path.Combine(this.currentDirectoryPath, @"Adjudicator\adjudicator.exe");
         }
     }
 }
