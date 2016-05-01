@@ -6,6 +6,7 @@ using SimpleInjector;
 
 namespace GoTournament
 {
+    using GoTournament.Factory;
 
     public class Program
     {
@@ -38,7 +39,11 @@ namespace GoTournament
             container.Register<IFileService, FileService> (Lifestyle.Singleton);
             container.Register<IConfigurationService, ConfigurationService>(Lifestyle.Singleton);
             container.Register<IConfigurationReader, ConfigurationReader>(Lifestyle.Singleton);
-            return new SimpleInjectorWrapper(container);
+            container.Register<IGoBotFactory, GoBotFactory>(Lifestyle.Singleton);
+            container.Register<IProcessWrapperFactory, ProcessWrapperFactory>(Lifestyle.Singleton);
+            var wrapper = new SimpleInjectorWrapper(container);
+            container.Register<ISimpleInjectorWrapper>(()=> wrapper);
+            return wrapper;
         }
 
         private static void RunGame(ISimpleInjectorWrapper container, string[] args)

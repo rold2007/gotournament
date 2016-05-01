@@ -12,12 +12,15 @@ using SimpleInjector;
 
 namespace GoTournament.Benchmark
 {
-    
+    using GoTournament.Factory;
 
     class ProgramBenchmark
     {
         private static readonly Stopwatch Watch = new Stopwatch();
         private static TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+        private static IGoBotFactory goBotFactory;
+        private static BotKind botKind;
 
         static void Main()
         {
@@ -29,6 +32,10 @@ namespace GoTournament.Benchmark
             var listToCheck = (from difficulty in Enumerable.Range(minimumAiLevel, maximumAiLevel - minimumAiLevel + 1)
                                from boardSize in Enumerable.Range(minimumBoardSize, maximumBoardSize - minimumBoardSize + 1)
                                select BenchmarkSettings.Create(boardSize, difficulty, difficulty)).ToList();
+            var injector = Bootstrap();
+            var reader = injector.GetInstance<IConfigurationReader>();
+            goBotFactory = injector.GetInstance<IGoBotFactory>();
+            botKind = reader.ReadBotKind("GnuGo");
             RunBenchmark(listToCheck);
             Console.ReadLine();
         }
@@ -49,8 +56,15 @@ namespace GoTournament.Benchmark
             Console.WriteLine("Board size: {0}, bot #1 strength : {1}, bot #2 strength: {2}", settings.BoardSize, settings.FirstBotLevel, settings.SecondBotLevel);
             tcs = new TaskCompletionSource<bool>();
             Watch.Restart();
-            var botWhite = new GnuGoBot("WhiteBot") { BoardSize = settings.BoardSize, Level = settings.FirstBotLevel };
-            var botBlack = new GnuGoBot("BlackBot") { BoardSize = settings.BoardSize, Level = settings.SecondBotLevel };
+
+            var botWhite = goBotFactory.CreateBotInstance(botKind, "WhiteBot");
+            botWhite.BoardSize = settings.BoardSize;
+            botWhite.Level = settings.FirstBotLevel;
+
+            var botBlack = goBotFactory.CreateBotInstance(new BotKind { BinaryPath = botKind.BinaryPath, FullClassName = botKind.FullClassName}, "BlackBot");
+            botBlack.BoardSize = settings.BoardSize;
+            botBlack.Level = settings.SecondBotLevel;
+
             var judge = new Adjudicator(Bootstrap(),
                 new Tournament
                 {
@@ -81,7 +95,11 @@ namespace GoTournament.Benchmark
             container.Register<IFileService, FileService>(Lifestyle.Singleton);
             container.Register<IConfigurationService, ConfigurationService>(Lifestyle.Singleton);
             container.Register<IConfigurationReader, ConfigurationReader>(Lifestyle.Singleton);
-            return new SimpleInjectorWrapper(container);
+            container.Register<IGoBotFactory, GoBotFactory>(Lifestyle.Singleton);
+            container.Register<IProcessWrapperFactory, ProcessWrapperFactory>(Lifestyle.Singleton);
+            var wrapper = new SimpleInjectorWrapper(container);
+            container.Register<ISimpleInjectorWrapper>(() => wrapper);
+            return wrapper;
         }
     }
 }

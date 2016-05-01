@@ -20,34 +20,18 @@ namespace GoTournament.UnitTest
             IGoBot bot = null;
             try
             {
-                bot = new GnuGoBot(process: null, name: null);
+                bot = new GnuGoBot(null, null, null);
                 Assert.True(false, "Should fail on previous statement");
             }
             catch (Exception ex)
             {
                 Assert.IsType(typeof(ArgumentNullException), ex);
-                Assert.Equal("Value cannot be null.\r\nParameter name: process", ex.Message);
+                Assert.Equal("Value cannot be null.\r\nParameter name: simpleInjector", ex.Message);
             }
-            var process = new Mock<IProcessWrapper>();
+            var injector = new Mock<ISimpleInjectorWrapper>();
             try
             {
-                bot = new GnuGoBot(process.Object, null);
-                Assert.True(false, "Should fail on previous statement");
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType(typeof(ArgumentNullException), ex);
-                Assert.Equal("Value cannot be null.\r\nParameter name: name", ex.Message);
-            }
-            bot = new GnuGoBot(process.Object, "Goodman");
-            Assert.NotNull(bot);
-            //Assert.Equal("Goodman", bot.Name);
-            Assert.NotNull(bot.MovePerformed);
-            //Assert.Equal(19, bot.BoardSize);
-
-            try
-            {
-                bot = new GnuGoBot(binaryPath:null, name:null, fileService:null, processProxy:null);
+                bot = new GnuGoBot(injector.Object, null, null);
                 Assert.True(false, "Should fail on previous statement");
             }
             catch (Exception ex)
@@ -57,31 +41,31 @@ namespace GoTournament.UnitTest
             }
             try
             {
-                bot = new GnuGoBot("C:\\bot.exe", "BotName", fileService: null, processProxy:null);
+                bot = new GnuGoBot(injector.Object, "bot.exe", null);
                 Assert.True(false, "Should fail on previous statement");
             }
             catch (Exception ex)
             {
                 Assert.IsType(typeof(ArgumentNullException), ex);
-                Assert.Equal("Value cannot be null.\r\nParameter name: fileService", ex.Message);
+                Assert.Equal("Value cannot be null.\r\nParameter name: botInstanceName", ex.Message);
             }
             var fileService = new Mock<IFileService>();
-            fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
+            fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
+            var processFactory = new Mock<IProcessWrapperFactory>();
+            processFactory.Setup(s=>s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(()=>new Mock<IProcessWrapper>().Object);
+            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            bot = new GnuGoBot(injector.Object, "bot.exe", "Goodman");
+            Assert.NotNull(bot);
+            //Assert.Equal("Goodman", bot.Name);
+            Assert.NotNull(bot.MovePerformed);
+            //Assert.Equal(19, bot.BoardSize);
+
+
             fileService.Setup(s => s.FileExists("noFile")).Returns(() => false);
             try
             {
-                bot = new GnuGoBot("noFile", "BotName", fileService.Object, processProxy:null);
-                Assert.True(false, "Should fail on previous statement");
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType(typeof(ArgumentNullException), ex);
-                Assert.Equal("Value cannot be null.\r\nParameter name: processProxy", ex.Message);
-            }
-            var processProxy = new Mock<IProcessProxy>();
-            try
-            {
-                bot = new GnuGoBot("noFile", "BotName", fileService.Object, processProxy.Object);
+                bot = new GnuGoBot(injector.Object, "noFile", "BotName");
                 Assert.True(false, "Should fail on previous statement");
             }
             catch (Exception ex)
@@ -89,16 +73,19 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(FileNotFoundException), ex);
                 Assert.Equal("Bot binnary not found,", ex.Message);
             }
-            bot = new GnuGoBot("someFile", "BotName", fileService.Object, processProxy.Object);
-                Assert.NotNull(bot);
-
         }
 
         [Fact]
         public void BoardSizeTest()
         {
-            var processWrapper = new Mock<IProcessWrapper>();
-            var bot = new GnuGoBot(processWrapper.Object, "BotName");
+            var injector = new Mock<ISimpleInjectorWrapper>();
+            var fileService = new Mock<IFileService>();
+            fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
+            var processFactory = new Mock<IProcessWrapperFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessWrapper>().Object);
+            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.Equal(19, bot.BoardSize);
             try
             {
@@ -128,8 +115,14 @@ namespace GoTournament.UnitTest
         [Fact]
         public void LevelTest()
         {
-            var processWrapper = new Mock<IProcessWrapper>();
-            var bot = new GnuGoBot(processWrapper.Object, "BotName");
+            var injector = new Mock<ISimpleInjectorWrapper>();
+            var fileService = new Mock<IFileService>();
+            fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
+            var processFactory = new Mock<IProcessWrapperFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessWrapper>().Object);
+            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.Equal(-1, bot.Level);
             bot.Level = 5;
             Assert.Equal(5, bot.Level);
@@ -149,12 +142,21 @@ namespace GoTournament.UnitTest
         [Fact]
         public void PlaceMoveTest()
         {
-            var processWrapper = new Mock<IProcessWrapper>();
             var writeDataList = new List<string>();
             bool disposed = false;
+            var injector = new Mock<ISimpleInjectorWrapper>();
+            var fileService = new Mock<IFileService>();
+            fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
+            var processWrapper = new Mock<IProcessWrapper>();
             processWrapper.Setup(s => s.WriteData(It.IsAny<string>())).Callback<string>(s => writeDataList.Add(s));
             processWrapper.Setup(s => s.Dispose()).Callback(() => disposed = true);
-            var bot = new GnuGoBot(processWrapper.Object, "BotName");
+
+            var processFactory = new Mock<IProcessWrapperFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(() => processWrapper.Object);
+            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             try
             {
                 bot.PlaceMove(null);
@@ -179,7 +181,7 @@ namespace GoTournament.UnitTest
                 Assert.Equal("Cannot access a disposed object.\r\nObject name: 'proccess'.", ex.Message);
             }
 
-            bot = new GnuGoBot(processWrapper.Object, "BotName");
+            bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             try
             {
                 bot.PlaceMove(Move.SpecialMove(MoveType.Resign));
@@ -203,8 +205,19 @@ namespace GoTournament.UnitTest
             var fakeProcess = new FakeProcessWrapper(processWrapper.Object);
             var writeDataList = new List<string>();
             processWrapper.Setup(s => s.WriteData(It.IsAny<string>())).Callback<string>(s => writeDataList.Add(s));
+
+            var injector = new Mock<ISimpleInjectorWrapper>();
+
+            var fileService = new Mock<IFileService>();
+            fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
+
+            var processFactory = new Mock<IProcessWrapperFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(() => fakeProcess);
+            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
             
-            var bot = new GnuGoBot(fakeProcess, "BotName");
+            var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.NotNull(fakeProcess.DataReceived);
             bot.StartGame(false);
             bot.PlaceMove(Move.Parse("A1"));

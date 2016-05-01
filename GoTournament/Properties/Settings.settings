@@ -1,9 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GoTournament.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
   <Profiles />
-  <Settings>
-    <Setting Name="adjudicatorPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">C:\Users\Jurii\Desktop\GO\gnugo-3.8\gnugo.exe</Value>
-    </Setting>
-  </Settings>
+  <Settings />
 </SettingsFile>

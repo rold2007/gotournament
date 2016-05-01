@@ -8,8 +8,9 @@ namespace GoTournament
 
     public class GnuGoBot : IGoBot
     {
-        #region Fields
 
+        #region Fields
+        
         private IProcessWrapper process;
         private int boardSize = 19;
         private bool black;
@@ -17,40 +18,28 @@ namespace GoTournament
         private bool disposed;
         private int level = -1;
         private bool waitingForMoveGenerating;
-
         private bool initialized = false;
         #endregion
 
         #region Ctors
 
-        public GnuGoBot(IProcessWrapper process, string name)
+        public GnuGoBot(ISimpleInjectorWrapper simpleInjector, string binaryPath, string botInstanceName)
         {
-            if (process == null)
-                throw new ArgumentNullException(nameof(process));
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            this.process = process;
-            this.Name = name;
+            if (simpleInjector == null)
+                throw new ArgumentNullException(nameof(simpleInjector));
+            if (binaryPath == null)
+                throw new ArgumentNullException(nameof(binaryPath));
+            if (botInstanceName == null) throw new ArgumentNullException(nameof(botInstanceName));
+            var fileService = simpleInjector.GetInstance<IFileService>();
+            if (!fileService.FileExists(binaryPath))
+                throw new FileNotFoundException("Bot binnary not found,", binaryPath);
+            this.process = simpleInjector.GetInstance<IProcessWrapperFactory>().Create(binaryPath, "--mode gtp");
             this.process.DataReceived = this.OnDataReceived;
+            this.Name = botInstanceName;
             //To reduce null reference checking 
             this.MovePerformed = delegate { };
         }
-
-        public GnuGoBot(string binaryPath, string name) : this(CreateIProcessWrapper(binaryPath, new FileService(), new ProcessProxy()), name) { }
-
-        /// <summary>
-        /// For Unit testing purpose
-        /// </summary>
-        /// <param name="binaryPath"></param>
-        /// <param name="name"></param>
-        /// <param name="fileService"></param>
-        /// <param name="processProxy"></param>
-        public GnuGoBot(string binaryPath, string name, IFileService fileService, IProcessProxy processProxy) : this(CreateIProcessWrapper(binaryPath, fileService, processProxy), name) { }
-
-
-        [Obsolete]
-        public GnuGoBot(string name): this(Properties.Settings.Default.adjudicatorPath, name) { }
-
+        
         #endregion
 
         #region Properties
@@ -112,7 +101,7 @@ namespace GoTournament
         private void OnDataReceived(string s)
         {
             //debug
-            //  File.AppendAllText(Name+".txt", string.Format("{0}|{1}|{2}", DateTime.Now.ToString("h:mm:ss.ff"), s, Environment.NewLine));
+             //File.AppendAllText(Name+".txt", string.Format("{0}|{1}|{2}", DateTime.Now.ToString("h:mm:ss.ff"), s, Environment.NewLine));
             if (!this.waitingForMoveGenerating) return;
             if (s == null) return;
             var move = Move.Parse(s);
@@ -138,19 +127,7 @@ namespace GoTournament
                 this.process.WriteData("level {0}", this.level);
             this.initialized = true;
         }
-        
-        private static IProcessWrapper CreateIProcessWrapper(string binaryPath, IFileService fileService, IProcessProxy processProxy)
-        {
-            if (binaryPath == null)
-                throw new ArgumentNullException(nameof(binaryPath));
-            if (fileService == null)
-                throw new ArgumentNullException(nameof(fileService));
-            if (processProxy == null)
-                throw new ArgumentNullException(nameof(processProxy));
-            if (!fileService.FileExists(binaryPath))
-                throw new FileNotFoundException("Bot binnary not found,", binaryPath);
-            return new ProcessWrapper(processProxy, binaryPath, "--mode gtp");
-        }
+       
 
         #endregion
 

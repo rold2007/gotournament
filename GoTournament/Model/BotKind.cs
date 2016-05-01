@@ -10,6 +10,6 @@ namespace GoTournament.Model
     {
         public string Name { get; set; }
         public string FullClassName { get; set; }
-        public string BinnaryPath { get; set; }
+        public string BinaryPath { get; set; }
     }
 }
