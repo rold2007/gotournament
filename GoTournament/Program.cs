@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using GoTournament.Interface;
+using System;
+using GoTournament.Service;
+using SimpleInjector;
 
 namespace GoTournament
 {
-    using System;
-
 
     public class Program
     {
@@ -18,7 +18,7 @@ namespace GoTournament
             }
             try
             {
-                RunGame(args);
+                RunGame(Bootstrap(), args);
                 Console.ReadLine();
             }
             catch (Exception ex)
@@ -30,12 +30,22 @@ namespace GoTournament
             }
         }
 
+        private static ISimpleInjectorWrapper Bootstrap()
+        {
+            var container = new Container();
+            container.Register<IProcessProxy, ProcessProxy > (Lifestyle.Singleton);
+            container.Register<IJsonService, JsonService> (Lifestyle.Singleton);
+            container.Register<IFileService, FileService> (Lifestyle.Singleton);
+            container.Register<IConfigurationService, ConfigurationService>(Lifestyle.Singleton);
+            container.Register<IConfigurationReader, ConfigurationReader>(Lifestyle.Singleton);
+            return new SimpleInjectorWrapper(container);
+        }
 
-        private static void RunGame(string[] args)
+        private static void RunGame(ISimpleInjectorWrapper container, string[] args)
         {
             string gamesCount = (args.Length > 1) ? args[1] : string.Empty;
 
-            ITournamentInitializer initializer = new TournamentInitializer(args.First(), gamesCount);
+            ITournamentInitializer initializer = new TournamentInitializer(container, args.First(), gamesCount);
             initializer.Run();
 
 

@@ -2,6 +2,8 @@
 
 namespace GoTournament.Interface
 {
+    using GoTournament.Model;
+
     public interface IBotRunner
     {
         Action<GameResult> EndGame { get; set; }

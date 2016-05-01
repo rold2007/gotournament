@@ -1,4 +1,4 @@
-namespace GoTournament
+namespace GoTournament.Model
 {
     public class GameResult
     {
@@ -18,11 +18,4 @@ namespace GoTournament
 
         public string FinalBoard { get; set; }
     }
-
-    public enum Color
-    {
-        None,
-        Black,
-        White
-    };
 }

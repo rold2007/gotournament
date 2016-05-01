@@ -16,9 +16,7 @@ namespace GoTournament.Service
             
             this.configurationService = configurationService;
         }
-
-        public ConfigurationReader(): this(new ConfigurationService()) { }
-
+        
         public Tournament ReadTournament(string name)
         {
             return this.configurationService.ReadConfig<Tournament>("Tournament\\" + name);

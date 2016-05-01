@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace GoTournament.Interface
 {
+    using GoTournament.Model;
+
     public interface IAdjudicator : IDisposable
     {
         void BlackMoves(Move move);

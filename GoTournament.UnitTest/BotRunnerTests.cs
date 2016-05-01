@@ -88,9 +88,8 @@ namespace GoTournament.UnitTest
         [Fact]
         public void BotRunnerCtorTest()
         {
-            var process = new Mock<IProcessWrapper>();
-            var confServ = new Mock<IConfigurationService>();
-            var adjudicator = new Adjudicator(process.Object, new Tournament(), confServ.Object);
+            var injector = new Mock<ISimpleInjectorWrapper>();
+            var adjudicator = new Adjudicator(injector.Object, new Tournament());
             var blackBot = new Mock<IGoBot>();
             var whiteBot = new Mock<IGoBot>();
             blackBot.Setup(s => s.Name).Returns(() => "Alice");

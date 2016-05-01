@@ -14,12 +14,12 @@ namespace GoTournament.UnitTest
         [Fact]
         public void ConfigurationServiceCtor()
         {
-            IConfigurationService configurationService = new ConfigurationService();
+           /* IConfigurationService configurationService = new ConfigurationService();
             Assert.NotNull(configurationService);
-            Assert.IsType(typeof(ConfigurationService), configurationService);
+            Assert.IsType(typeof(ConfigurationService), configurationService);*/
             var jsonService = new Mock<IJsonService>();
             var fileService = new Mock<IFileService>();
-            configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
+            IConfigurationService configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
             Assert.NotNull(configurationService);
             Assert.IsType(typeof(ConfigurationService), configurationService);
         }

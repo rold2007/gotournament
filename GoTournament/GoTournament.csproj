@@ -33,8 +33,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Glimpse.AspNet, Version=1.9.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Glimpse.AspNet.1.9.2\lib\net45\Glimpse.AspNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Glimpse.Core, Version=1.8.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Glimpse.1.8.6\lib\net45\Glimpse.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Glimpse.SimpleInjector, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Glimpse.SimpleInjector.1.0.1\lib\net40\Glimpse.SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SimpleInjector, Version=2.8.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.2.8.0\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -49,9 +65,13 @@
   <ItemGroup>
     <Compile Include="Adjudicator.cs" />
     <Compile Include="BotRunner.cs" />
+    <Compile Include="GlimpseSecurityPolicy.cs" />
+    <Compile Include="Interface\IConfigurationReader.cs" />
     <Compile Include="Interface\ITournamentInitializer.cs" />
     <Compile Include="Interface\IProcessProxy.cs" />
+    <Compile Include="Interface\ISimpleInjectorWrapper.cs" />
     <Compile Include="Model\BotInstance.cs" />
+    <Compile Include="Model\Color.cs" />
     <Compile Include="Model\Tournament.cs" />
     <Compile Include="ProcessProxy.cs" />
     <Compile Include="Service\ConfigurationReader.cs" />
@@ -77,6 +97,7 @@
     </Compile>
     <Compile Include="Interface\IJsonService.cs" />
     <Compile Include="Service\JsonService.cs" />
+    <Compile Include="SimpleInjectorWrapper.cs" />
     <Compile Include="TournamentInitializer.cs" />
   </ItemGroup>
   <ItemGroup>

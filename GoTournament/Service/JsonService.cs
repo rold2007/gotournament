@@ -7,6 +7,7 @@ namespace GoTournament.Service
     {
         public T DeserializeObject<T>(string value)
         {
+            value = value.Replace("\\","\\\\");
             return JsonConvert.DeserializeObject<T>(value);
         }
 

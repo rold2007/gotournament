@@ -11,22 +11,23 @@ namespace GoTournament
 {
     public class TournamentInitializer : ITournamentInitializer
     {
+        private readonly ISimpleInjectorWrapper simpleInjector;
         public readonly string Name;
         private readonly string gamesCount;
         private readonly IConfigurationReader configurationReader;
         private TaskCompletionSource<GameResult> taskResult;
         private readonly List<GameResult> results = new List<GameResult>();
 
-        public TournamentInitializer(string name, string gamesCount, ConfigurationReader configurationReader)
+        public TournamentInitializer(ISimpleInjectorWrapper simpleInjector, string name, string gamesCount)
         {
-            if (configurationReader == null) throw new ArgumentNullException(nameof(configurationReader));
+            if (simpleInjector == null)
+                throw new ArgumentNullException(nameof(simpleInjector));
+            this.configurationReader = simpleInjector.GetInstance<IConfigurationReader>();
+            this.simpleInjector = simpleInjector;
             this.Name = name;
             this.gamesCount = gamesCount;
-            this.configurationReader = configurationReader;
         }
-
-        public TournamentInitializer(string name, string gamesCount) : this(name, gamesCount, new ConfigurationReader()) { }
-
+        
         public async void Run()
         {
             var scenario = this.configurationReader.ReadTournament(this.Name);
@@ -41,15 +42,15 @@ namespace GoTournament
             for (var i = 0; i < scenario.GamesCount; i++)
             {
                 this.taskResult = new TaskCompletionSource<GameResult>();
-                IGoBot blackBot = GetInstance(blackKind, blackInstance.Name);
-                IGoBot whiteBot = GetInstance(whiteKind, whiteInstance.Name);
+                IGoBot blackBot = this.GetInstance(blackKind, blackInstance.Name);
+                IGoBot whiteBot = this.GetInstance(whiteKind, whiteInstance.Name);
                 blackBot.BoardSize = scenario.BoardSize;
                 whiteBot.BoardSize = scenario.BoardSize;
                 blackBot.Level = blackInstance.Level;
                 whiteBot.Level = whiteInstance.Level;
 
-                RunBotRunner(blackBot, whiteBot, scenario);
-                OutputStatistic(await this.taskResult.Task, blackInstance.Name, whiteInstance.Name);
+                this.RunBotRunner(blackBot, whiteBot, scenario);
+                this.OutputStatistic(await this.taskResult.Task, blackInstance.Name, whiteInstance.Name);
             }
 
 
@@ -81,7 +82,7 @@ namespace GoTournament
         {
             //var finished = false;
             var sync = new object();
-            var judge = new Adjudicator(tourn)
+            var judge = new Adjudicator(this.simpleInjector, tourn)
             {
                 BoardUpdated = board =>
                 {

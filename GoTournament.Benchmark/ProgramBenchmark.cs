@@ -7,9 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoTournament.Interface;
 using GoTournament.Model;
+using GoTournament.Service;
+using SimpleInjector;
 
 namespace GoTournament.Benchmark
 {
+    
+
     class ProgramBenchmark
     {
         private static readonly Stopwatch Watch = new Stopwatch();
@@ -47,7 +51,7 @@ namespace GoTournament.Benchmark
             Watch.Restart();
             var botWhite = new GnuGoBot("WhiteBot") { BoardSize = settings.BoardSize, Level = settings.FirstBotLevel };
             var botBlack = new GnuGoBot("BlackBot") { BoardSize = settings.BoardSize, Level = settings.SecondBotLevel };
-            var judge = new Adjudicator(
+            var judge = new Adjudicator(Bootstrap(),
                 new Tournament
                 {
                     BoardSize = settings.BoardSize,
@@ -67,6 +71,17 @@ namespace GoTournament.Benchmark
                 string.Format("{0:D2}m:{1:D2}s:{2:D3}ms", Watch.Elapsed.Minutes, Watch.Elapsed.Seconds, Watch.Elapsed.Milliseconds), stat.EndReason, stat.FinalScore);
             Console.WriteLine(stat.FinalBoard);
             tcs.SetResult(true);
+        }
+
+        private static ISimpleInjectorWrapper Bootstrap()
+        {
+            var container = new Container();
+            container.Register<IProcessProxy, ProcessProxy>(Lifestyle.Singleton);
+            container.Register<IJsonService, JsonService>(Lifestyle.Singleton);
+            container.Register<IFileService, FileService>(Lifestyle.Singleton);
+            container.Register<IConfigurationService, ConfigurationService>(Lifestyle.Singleton);
+            container.Register<IConfigurationReader, ConfigurationReader>(Lifestyle.Singleton);
+            return new SimpleInjectorWrapper(container);
         }
     }
 }
