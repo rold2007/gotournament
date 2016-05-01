@@ -10,8 +10,6 @@ using GoTournament.Model;
 
 namespace GoTournament
 {
-    using GoTournament.Service;
-
     public class Adjudicator : IAdjudicator
     {
         private IProcessWrapper process;
@@ -35,19 +33,15 @@ namespace GoTournament
 
         public Adjudicator(ISimpleInjectorWrapper simpleInjector, Tournament tournament)
         {
-            if (simpleInjector == null)
-                throw new ArgumentNullException(nameof(simpleInjector));
-            if (tournament == null)
-                throw new ArgumentNullException(nameof(tournament));
+            if (simpleInjector == null) throw new ArgumentNullException(nameof(simpleInjector));
+            if (tournament == null) throw new ArgumentNullException(nameof(tournament));
             var fileService = simpleInjector.GetInstance<IFileService>();
             this.configurationService = simpleInjector.GetInstance<IConfigurationService>();
             var binaryPath = this.configurationService.GetAdjudicatorBinnaryPath();
-            if (!fileService.FileExists(binaryPath))
-                throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
-            var processProxy = simpleInjector.GetInstance<IProcessProxy>();
-            this.process = new ProcessWrapper(processProxy, binaryPath, "--mode gtp");
-            this.tournament = tournament;
+            if (!fileService.FileExists(binaryPath)) throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
+            this.process = simpleInjector.GetInstance<IProcessWrapperFactory>().Create(binaryPath, "--mode gtp");
             this.process.DataReceived = this.OnDataReceived;
+            this.tournament = tournament;
             if (this.tournament.BoardSize != 19)
             {
                 this.process.WriteData("boardsize {0}", this.tournament.BoardSize);
@@ -283,6 +277,4 @@ namespace GoTournament
         #endregion
 
     }
-
-    public enum EndGameReason { None, MoveTimeOut, Resign, InvalidMove, ConsecutivePass }
 }

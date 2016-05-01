@@ -55,17 +55,17 @@ namespace GoTournament.UnitTest
             var tour = reader.ReadTournament("daisy");
             Assert.NotNull(tour);
             Assert.Equal("TourName", tour.Name);
-            Assert.Equal("Tournament\\daisy", tournamentInput);
+            Assert.Equal("Configuration\\Tournament\\daisy", tournamentInput);
 
             var instance = reader.ReadBotInstance("flower");
             Assert.NotNull(instance);
             Assert.Equal("InstanceName", instance.Name);
-            Assert.Equal("BotInstance\\flower", instanceInput);
+            Assert.Equal("Configuration\\BotInstance\\flower", instanceInput);
 
             var kind = reader.ReadBotKind("gnu");
             Assert.NotNull(kind);
             Assert.Equal("KindName", kind.Name);
-            Assert.Equal("BotKind\\gnu", kindInput);
+            Assert.Equal("Configuration\\BotKind\\gnu", kindInput);
 
             configurationService.VerifyAll();
         }

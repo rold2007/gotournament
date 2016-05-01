@@ -19,17 +19,17 @@ namespace GoTournament.Service
         
         public Tournament ReadTournament(string name)
         {
-            return this.configurationService.ReadConfig<Tournament>("Tournament\\" + name);
+            return this.configurationService.ReadConfig<Tournament>("Configuration\\Tournament\\" + name);
         }
 
         public BotInstance ReadBotInstance(string name)
         {
-            return this.configurationService.ReadConfig<BotInstance>("BotInstance\\" + name);
+            return this.configurationService.ReadConfig<BotInstance>("Configuration\\BotInstance\\" + name);
         }
 
         public BotKind ReadBotKind(string name)
         {
-            return this.configurationService.ReadConfig<BotKind>("BotKind\\" + name);
+            return this.configurationService.ReadConfig<BotKind>("Configuration\\BotKind\\" + name);
         }
     }
 }

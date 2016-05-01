@@ -87,9 +87,9 @@ namespace GoTournament
                 return SpecialMove(MoveType.Pass);
             if (clean.ToLower().Contains("resign"))
                 return SpecialMove(MoveType.Resign);
-            if (clean.ToLower().Contains("illegal move"))
+            if (clean.ToLower().Contains("illegalmove"))
                 return SpecialMove(MoveType.Illegal);
-            if (clean.ToLower().Contains("invalid coordinate"))
+            if (clean.ToLower().Contains("invalidcoordinate"))
                 return SpecialMove(MoveType.Invalid);
             return null;
         }

@@ -12,17 +12,25 @@ namespace GoTournament
     public class TournamentInitializer : ITournamentInitializer
     {
         private readonly ISimpleInjectorWrapper simpleInjector;
+
         public readonly string Name;
+
         private readonly string gamesCount;
+
         private readonly IConfigurationReader configurationReader;
+
         private TaskCompletionSource<GameResult> taskResult;
+
         private readonly List<GameResult> results = new List<GameResult>();
+
+        private readonly IGoBotFactory goBotFactory;
 
         public TournamentInitializer(ISimpleInjectorWrapper simpleInjector, string name, string gamesCount)
         {
             if (simpleInjector == null)
                 throw new ArgumentNullException(nameof(simpleInjector));
             this.configurationReader = simpleInjector.GetInstance<IConfigurationReader>();
+            this.goBotFactory = simpleInjector.GetInstance<IGoBotFactory>();
             this.simpleInjector = simpleInjector;
             this.Name = name;
             this.gamesCount = gamesCount;
@@ -42,8 +50,8 @@ namespace GoTournament
             for (var i = 0; i < scenario.GamesCount; i++)
             {
                 this.taskResult = new TaskCompletionSource<GameResult>();
-                IGoBot blackBot = this.GetInstance(blackKind, blackInstance.Name);
-                IGoBot whiteBot = this.GetInstance(whiteKind, whiteInstance.Name);
+                IGoBot blackBot = this.goBotFactory.CreateBotInstance(blackKind, blackInstance.Name);
+                IGoBot whiteBot = this.goBotFactory.CreateBotInstance(whiteKind, whiteInstance.Name);
                 blackBot.BoardSize = scenario.BoardSize;
                 whiteBot.BoardSize = scenario.BoardSize;
                 blackBot.Level = blackInstance.Level;
@@ -53,7 +61,6 @@ namespace GoTournament
                 this.OutputStatistic(await this.taskResult.Task, blackInstance.Name, whiteInstance.Name);
             }
 
-
         }
 
         private void OutputStatistic(GameResult gameResult, string blackName, string whiteName)
@@ -62,21 +69,6 @@ namespace GoTournament
             Console.WriteLine("Bot \"{0}\" won {1} time(s)", blackName, this.results.Count(r => r.WinnerName == blackName));
             Console.WriteLine("Bot \"{0}\" won {1} time(s)", whiteName, this.results.Count(r => r.WinnerName == whiteName));
         }
-
-        private IGoBot GetInstance(BotKind kind, string botInstanceName)
-        {
-            Type type = Type.GetType(kind.FullClassName);
-            if (type != null)
-                return (IGoBot)Activator.CreateInstance(type, kind.BinnaryPath, botInstanceName);
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                type = asm.GetType(kind.FullClassName);
-                if (type != null)
-                    return (IGoBot)Activator.CreateInstance(type, kind.BinnaryPath, botInstanceName);
-            }
-            return null;
-        }
-
 
         private void RunBotRunner(IGoBot botBlack, IGoBot botWhite, Tournament tourn)
         {
