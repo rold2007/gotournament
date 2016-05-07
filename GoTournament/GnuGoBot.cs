@@ -5,13 +5,14 @@ using GoTournament.Service;
 
 namespace GoTournament
 {
+    using GoTournament.Model;
 
     public class GnuGoBot : IGoBot
     {
 
         #region Fields
         
-        private IProcessWrapper process;
+        private IProcessManager process;
         private int boardSize = 19;
         private bool black;
         private string genmoveCommand;
@@ -33,7 +34,7 @@ namespace GoTournament
             var fileService = simpleInjector.GetInstance<IFileService>();
             if (!fileService.FileExists(binaryPath))
                 throw new FileNotFoundException("Bot binnary not found,", binaryPath);
-            this.process = simpleInjector.GetInstance<IProcessWrapperFactory>().Create(binaryPath, "--mode gtp");
+            this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(binaryPath, "--mode gtp");
             this.process.DataReceived = this.OnDataReceived;
             this.Name = botInstanceName;
             //To reduce null reference checking 
@@ -158,7 +159,7 @@ namespace GoTournament
 
         ~GnuGoBot()
         {
-            Dispose(false);
+            this.Dispose(false);
         }
 
         #endregion

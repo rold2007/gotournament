@@ -4,6 +4,6 @@ namespace GoTournament.Interface
 
     public interface IProcessProxy
     {
-        Process Start(ProcessStartInfo processStartInfo);
+        IProcessWrapper Start(ProcessStartInfo processStartInfo);
     }
 }

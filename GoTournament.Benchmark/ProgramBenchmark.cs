@@ -96,7 +96,8 @@ namespace GoTournament.Benchmark
             container.Register<IConfigurationService, ConfigurationService>(Lifestyle.Singleton);
             container.Register<IConfigurationReader, ConfigurationReader>(Lifestyle.Singleton);
             container.Register<IGoBotFactory, GoBotFactory>(Lifestyle.Singleton);
-            container.Register<IProcessWrapperFactory, ProcessWrapperFactory>(Lifestyle.Singleton);
+            container.Register<IProcessManagerFactory, ProcessManagerFactory>(Lifestyle.Singleton);
+            container.Register<ILogger, DebugLogger>(Lifestyle.Singleton);
             var wrapper = new SimpleInjectorWrapper(container);
             container.Register<ISimpleInjectorWrapper>(() => wrapper);
             return wrapper;

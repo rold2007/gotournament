@@ -10,6 +10,8 @@ namespace GoTournament.UnitTest
     using System.IO;
     using System.Linq;
 
+    using GoTournament.Model;
+
     using Xunit.Sdk;
 
     public class GnuGoBotTests
@@ -52,9 +54,10 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var processFactory = new Mock<IProcessWrapperFactory>();
-            processFactory.Setup(s=>s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(()=>new Mock<IProcessWrapper>().Object);
-            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var processFactory = new Mock<IProcessManagerFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(() => new Mock<IProcessManager>().Object);
+            injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
             bot = new GnuGoBot(injector.Object, "bot.exe", "Goodman");
             Assert.NotNull(bot);
             //Assert.Equal("Goodman", bot.Name);
@@ -82,9 +85,10 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var processFactory = new Mock<IProcessWrapperFactory>();
-            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessWrapper>().Object);
-            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var processFactory = new Mock<IProcessManagerFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(() => new Mock<IProcessManager>().Object);
+            injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.Equal(19, bot.BoardSize);
             try
@@ -119,9 +123,10 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var processFactory = new Mock<IProcessWrapperFactory>();
-            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessWrapper>().Object);
-            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var processFactory = new Mock<IProcessManagerFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(() => new Mock<IProcessManager>().Object);
+            injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.Equal(-1, bot.Level);
             bot.Level = 5;
@@ -148,14 +153,15 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var processWrapper = new Mock<IProcessWrapper>();
-            processWrapper.Setup(s => s.WriteData(It.IsAny<string>())).Callback<string>(s => writeDataList.Add(s));
+            var processWrapper = new Mock<IProcessManager>();
+            processWrapper.Setup(s => s.WriteData(It.IsAny<string>(), It.IsAny<object[]>()))
+                .Callback<string, object[]>((s, a) => writeDataList.Add(s));
             processWrapper.Setup(s => s.Dispose()).Callback(() => disposed = true);
 
-            var processFactory = new Mock<IProcessWrapperFactory>();
+            var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(() => processWrapper.Object);
-            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             try
             {
@@ -201,22 +207,21 @@ namespace GoTournament.UnitTest
         [Fact]
         public void OnDataReceivedTest()
         {
-            var processWrapper = new Mock<IProcessWrapper>();
-            var fakeProcess = new FakeProcessWrapper(processWrapper.Object);
+            var processWrapper = new Mock<IProcessManager>();
+            var fakeProcess = new FakeProcessManager(processWrapper.Object);
             var writeDataList = new List<string>();
-            processWrapper.Setup(s => s.WriteData(It.IsAny<string>())).Callback<string>(s => writeDataList.Add(s));
-
+            processWrapper.Setup(s => s.WriteData(It.IsAny<string>(), It.IsAny<object[]>()))
+                .Callback<string, object[]>((s, a) => writeDataList.Add(s));
             var injector = new Mock<ISimpleInjectorWrapper>();
 
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
 
-            var processFactory = new Mock<IProcessWrapperFactory>();
-            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(() => fakeProcess);
-            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
-            
+            var processFactory = new Mock<IProcessManagerFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => fakeProcess);
+            injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
+
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.NotNull(fakeProcess.DataReceived);
             bot.StartGame(false);
@@ -227,27 +232,5 @@ namespace GoTournament.UnitTest
             Assert.Equal("genmove white", writeDataList.ElementAt(1));
         }
 
-        public class FakeProcessWrapper : IProcessWrapper
-        {
-            private readonly IProcessWrapper process;
-
-            public FakeProcessWrapper(IProcessWrapper process)
-            {
-                this.process = process;
-            }
-            public void Dispose() { }
-
-            public Action<string> DataReceived { get; set; }
-
-            public void WriteData(string data)
-            {
-                process.WriteData(data);
-            }
-
-            public void WriteData(string data, params object[] args)
-            {
-                process.WriteData(data, args);
-            }
-        }
     }
 }

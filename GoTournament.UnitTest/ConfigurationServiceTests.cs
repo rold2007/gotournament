@@ -8,18 +8,35 @@ using Xunit;
 
 namespace GoTournament.UnitTest
 {
-
     public class ConfigurationServiceTests
     {
         [Fact]
-        public void ConfigurationServiceCtor()
+        public void ConfigurationServiceCtorTest()
         {
-           /* IConfigurationService configurationService = new ConfigurationService();
-            Assert.NotNull(configurationService);
-            Assert.IsType(typeof(ConfigurationService), configurationService);*/
+            IConfigurationService configurationService;
+            try
+            {
+                configurationService = new ConfigurationService(null, null);
+                Assert.True(false, "Should fail on previous statement");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType(typeof(ArgumentNullException), ex);
+                Assert.Equal("Value cannot be null.\r\nParameter name: jsonService", ex.Message);
+            }
             var jsonService = new Mock<IJsonService>();
+            try
+            {
+                configurationService = new ConfigurationService(jsonService.Object, null);
+                Assert.True(false, "Should fail on previous statement");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType(typeof(ArgumentNullException), ex);
+                Assert.Equal("Value cannot be null.\r\nParameter name: fileService", ex.Message);
+            }
             var fileService = new Mock<IFileService>();
-            IConfigurationService configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
+            configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
             Assert.NotNull(configurationService);
             Assert.IsType(typeof(ConfigurationService), configurationService);
         }
@@ -77,6 +94,16 @@ namespace GoTournament.UnitTest
             Assert.True(filePath.EndsWith("tree.json"));
             jsonService.VerifyAll();
             fileService.VerifyAll();
+        }
+
+        [Fact]
+        public void ConfigurationServiceGetAdjudicatorBinnaryPathTest()
+        {
+            var jsonService = new Mock<IJsonService>();
+            var fileService = new Mock<IFileService>();
+            IConfigurationService configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
+            Assert.True(configurationService.GetAdjudicatorBinnaryPath().EndsWith(@"\Adjudicator\adjudicator.exe"));
+
         }
 
     }
