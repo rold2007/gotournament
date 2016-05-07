@@ -2,6 +2,8 @@ using System;
 
 namespace GoTournament.Interface
 {
+    using GoTournament.Model;
+
     public interface IGoBot : IDisposable
     {
         void StartGame(bool goesFirst);

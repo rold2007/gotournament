@@ -78,14 +78,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdjudicatorTests.cs" />
     <Compile Include="BotRunnerTests.cs" />
     <Compile Include="ConfigurationReaderTests.cs" />
     <Compile Include="ConfigurationServiceTests.cs" />
+    <Compile Include="FakeProcessManager.cs" />
+    <Compile Include="FakeProcessWrapper.cs" />
     <Compile Include="FileServiceTests.cs" />
     <Compile Include="GlimpseSecurityPolicy.cs" />
     <Compile Include="GnuGoBotTests.cs" />
+    <Compile Include="GoBotFactoryTests.cs" />
     <Compile Include="JsonServiceTests.cs" />
+    <Compile Include="MoveTests.cs" />
+    <Compile Include="ProcessManagerFactoryTests.cs" />
+    <Compile Include="ProcessManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleInjectorWrapperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

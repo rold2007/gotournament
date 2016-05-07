@@ -6,9 +6,9 @@ namespace GoTournament
 
     public class ProcessProxy : IProcessProxy
     {
-        public Process Start(ProcessStartInfo processStartInfo)
+        public IProcessWrapper Start(ProcessStartInfo processStartInfo)
         {
-            return Process.Start(processStartInfo);
+            return new ProcessWrapper(Process.Start(processStartInfo));
         }
     }
 }

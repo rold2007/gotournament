@@ -1,11 +1,13 @@
-using System;
+﻿using System.Diagnostics;
 
-namespace GoTournament.Interface
+namespace GoTournament
 {
-    public interface IProcessWrapper : IDisposable
+    public interface IProcessWrapper
     {
-        Action<string> DataReceived { get; set; }
-        void WriteData(string data);
+        event DataReceivedEventHandler OutputDataReceived;
+
+        void BeginOutputReadLine();
+        void Dispose();
         void WriteData(string data, params object[] args);
     }
 }

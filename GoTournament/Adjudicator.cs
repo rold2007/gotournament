@@ -12,7 +12,7 @@ namespace GoTournament
 {
     public class Adjudicator : IAdjudicator
     {
-        private IProcessWrapper process;
+        private IProcessManager process;
         private bool disposed;
         private const string Black = "black ";
         private const string White = "white ";
@@ -28,6 +28,7 @@ namespace GoTournament
         
         private readonly Tournament tournament;
         private readonly IConfigurationService configurationService;
+        private readonly ILogger logger;
 
         #region Ctors
 
@@ -39,7 +40,8 @@ namespace GoTournament
             this.configurationService = simpleInjector.GetInstance<IConfigurationService>();
             var binaryPath = this.configurationService.GetAdjudicatorBinnaryPath();
             if (!fileService.FileExists(binaryPath)) throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
-            this.process = simpleInjector.GetInstance<IProcessWrapperFactory>().Create(binaryPath, "--mode gtp");
+            this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(binaryPath, "--mode gtp");
+            this.logger = simpleInjector.GetInstance<ILogger>();
             this.process.DataReceived = this.OnDataReceived;
             this.tournament = tournament;
             if (this.tournament.BoardSize != 19)
@@ -58,27 +60,27 @@ namespace GoTournament
         {
             if (this.whiteGoes) // its white turn now
             {
-                Debug.WriteLine("Unexpected behaviour: black bot makes move when it is not its turn"); //TODO write in logs
+                this.logger.WriteWarning("Black bot makes move when it is not its turn");
                 return;
             }
-            MakeMove(move, Black);
+            this.MakeMove(move, Black);
         }
 
         public void WhiteMoves(Move move)
         {
             if (!this.whiteGoes) //its black turn now
             {
-                Debug.WriteLine("Warning: white bot makes move when it is not its turn"); //TODO write in logs
+                this.logger.WriteWarning("White bot makes move when it is not its turn");
                 return;
             }
-            MakeMove(move, White);
+            this.MakeMove(move, White);
         }
 
         private void MakeMove(Move move, string color)
         {
             if (this.waitingForMoveResult)
             {
-                Debug.WriteLine("Warning: Previous move was not yet validated. Ignoring {0} from {1}", move, color); //TODO write in logs
+                this.logger.WriteWarning("Previous move was not yet validated. Ignoring {0} from {1}", move, color);
                 return; // ignore because waiting for last turn results
             }
             if (move == null) throw new ArgumentNullException(nameof(move));
@@ -86,13 +88,19 @@ namespace GoTournament
 
             if (!move.Normal)
             {
-                if (this.lastInputMoveIsPass && move.Pass)
+                if (move.Pass)
                 {
-                    RaiseResigned(EndGameReason.ConsecutivePass, !this.whiteGoes);
+                    if (this.lastInputMoveIsPass)
+                    {
+                        this.RaiseResigned(EndGameReason.ConsecutivePass, !this.whiteGoes);
+                        return;
+                    }
+                }
+                else
+                {
+                    this.RaiseResigned(move.ToEndGameReason(), !this.whiteGoes);
                     return;
                 }
-                RaiseResigned(move.ToEndGameReason(), !this.whiteGoes);
-                return;
             }
             this.lastInputMoveIsPass = move.Pass;
             this.waitingForMoveResult = true;
@@ -102,19 +110,19 @@ namespace GoTournament
 
         private void OnDataReceived(string line)
         {
-            Debug.WriteLine(line);
+            //logger.WriteInfo(line);
             if (this.waitingForMoveResult)
             {
                 if (line == "? illegal move" || line == "? invalid coordinate")
                 {
-                    RaiseResigned(EndGameReason.InvalidMove, this.whiteGoes);
+                    this.RaiseResigned(EndGameReason.InvalidMove, this.whiteGoes);
                     this.waitingForMoveResult = false;
                 }
                 if (line == "= ")
                 {
                     this.waitingForMoveResult = false;
                     this.whiteGoes = !this.whiteGoes; // switch who has to move next
-                    PushValidationResult();
+                    this.PushValidationResult();
                 }
             }
             if (this.taskScore != null && (line.StartsWith("= W+") || (line.StartsWith("= B+"))))
@@ -126,7 +134,7 @@ namespace GoTournament
 
             if (this.waitingForShowBoard)
             {
-                HandleBoardReading(line);
+                this.HandleBoardReading(line);
             }
         }
 
@@ -138,13 +146,15 @@ namespace GoTournament
                 {
                     if (this.boardParts.First().Contains(" A "))
                         this.boardParts.RemoveAt(0);
-                    int firstLineId = this.boardParts.IndexOf(this.boardParts.First(l => l.Contains(" A ")));
-                    if (firstLineId > 0)
-                        this.boardParts.RemoveRange(0, firstLineId);
+                    var firstLine = this.boardParts.FirstOrDefault(l => l.Contains(" A "));
+                    if (firstLine != null) //cutting off previous lines if possible
+                    {
+                        int firstLineId = this.boardParts.IndexOf(firstLine);
+                        if (firstLineId > 0) this.boardParts.RemoveRange(0, firstLineId);
+                    }
                     this.boardParts.Add(line);
                     this.waitingForShowBoard = false;
-                    if (BoardUpdated != null)
-                        BoardUpdated(this.boardParts);
+                    if (this.BoardUpdated != null) this.BoardUpdated(this.boardParts);
                     if (this.taskBoard != null)
                         this.taskBoard.SetResult(this.boardParts);
                 }
@@ -156,10 +166,10 @@ namespace GoTournament
         {
             this.movesCount++;
             if (!this.whiteGoes) //vice versa because not yet switched
-                WhiteMoveValidated(this.lastReceivedMove);
-            else BlackMoveValidated(this.lastReceivedMove);
-            if (BoardUpdated != null) // If there is no subscription, don't even get this info
-                UpdateBoard();
+                this.WhiteMoveValidated(this.lastReceivedMove);
+            else this.BlackMoveValidated(this.lastReceivedMove);
+            if (this.BoardUpdated != null) // If there is no subscription, don't even get this info
+                this.UpdateBoard();
         }
 
         private void UpdateBoard()
@@ -184,7 +194,7 @@ namespace GoTournament
             }
             else
             {
-                var score = GetFinalScore().Result;
+                var score = this.GetFinalScore().Result;
                 statistic.FinalScore = score.Item1;
                 if (score.Item2 == Color.White)
                 {
@@ -197,16 +207,16 @@ namespace GoTournament
                     statistic.LooserName = this.tournament.WhiteBot;
                 }
             }
-            if (GenerateLastBoard)
-                statistic.FinalBoard = GetLastBoard().Result;
-            if (SaveGameResults)
+            if (this.GenerateLastBoard)
+                statistic.FinalBoard = this.GetLastBoard().Result;
+            if (this.SaveGameResults)
             {
                 var fileName = string.Format("{0}{1}", this.tournament.Name, DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
                 this.process.WriteData("printsgf " + fileName + ".sgf");
                 statistic.ResultsFileName = fileName;
                 this.configurationService.SerializeGameResult(statistic, fileName);
             }
-            Resigned(statistic);
+            this.Resigned(statistic);
         }
 
         private async Task<Tuple<int, Color>> GetFinalScore()
@@ -216,7 +226,7 @@ namespace GoTournament
             var scoreLine = await this.taskScore.Task;
             var score = 0;
             if (!int.TryParse(scoreLine.Substring(2), NumberStyles.AllowDecimalPoint, new NumberFormatInfo { NumberDecimalSeparator = "." }, out score))
-                Debug.WriteLine("WARNING: could not parse final score: {0}", scoreLine);
+                logger.WriteWarning("Could not parse final score: {0}", scoreLine);
             Color color = Color.None;
             if (scoreLine.StartsWith("W"))
                 color = Color.White;
@@ -230,15 +240,12 @@ namespace GoTournament
         private async Task<string> GetLastBoard()
         {
             this.taskBoard = new TaskCompletionSource<IEnumerable<string>>();
-            UpdateBoard();
+            this.UpdateBoard();
             return string.Join("\n", await this.taskBoard.Task);
         }
 
         public Action<Move> WhiteMoveValidated { get; set; }
         public Action<Move> BlackMoveValidated { get; set; }
-        /// <summary>
-        /// Resign because of wrong move. True means white
-        /// </summary>
         public Action<GameResult> Resigned { get; set; }
         public Action<IEnumerable<string>> BoardUpdated { get; set; }
         public bool SaveGameResults { get; set; }
@@ -248,7 +255,7 @@ namespace GoTournament
 
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -271,7 +278,7 @@ namespace GoTournament
 
         ~Adjudicator()
         {
-            Dispose(false);
+            this.Dispose(false);
         }
 
         #endregion

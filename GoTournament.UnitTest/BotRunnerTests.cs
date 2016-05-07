@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using GoTournament.Interface;
 using Moq;
-using System.Security.Cryptography.X509Certificates;
 using GoTournament.Model;
 
 namespace GoTournament.UnitTest
@@ -94,9 +89,9 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var processFactory = new Mock<IProcessWrapperFactory>();
-            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessWrapper>().Object);
-            injector.Setup(s => s.GetInstance<IProcessWrapperFactory>()).Returns(() => processFactory.Object);
+            var processFactory = new Mock<IProcessManagerFactory>();
+            processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessManager>().Object);
+            injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
             var adjudicator = new Adjudicator(injector.Object, new Tournament());
             var blackBot = new Mock<IGoBot>();
             var whiteBot = new Mock<IGoBot>();
@@ -153,5 +148,7 @@ namespace GoTournament.UnitTest
             blackBot.VerifyAll();
             whiteBot.VerifyAll();
         }
+
+
     }
 }

@@ -1,58 +1,56 @@
-using System;
-
-namespace GoTournament
+namespace GoTournament.Model
 {
-    public enum MoveType { None, Normal, Pass, Resign, Invalid, Illegal }
+    using System;
 
     public class Move
     {
-
         public MoveType Type { get; private set; }
         public string Letter { get; set; }
         public string Number { get; set; }
 
         public bool Pass
         {
-            get { return Type == MoveType.Pass; }
-        }
-
-        public bool Resign
-        {
-            get { return Type == MoveType.Resign; }
-        }
-
-        public bool Invalid
-        {
-            get { return Type == MoveType.Invalid; }
-        }
-
-        public bool Illegal
-        {
-            get { return Type == MoveType.Illegal; }
+            get { return this.Type == MoveType.Pass; }
         }
 
         public bool Normal
         {
-            get { return Type == MoveType.Normal; }
+            get { return this.Type == MoveType.Normal; }
         }
-        
+
+        /*       NOT USED SO FAR
+                public bool Resign
+                {
+                    get { return Type == MoveType.Resign; }
+                }
+
+                public bool Invalid
+                {
+                    get { return Type == MoveType.Invalid; }
+                }
+
+                public bool Illegal
+                {
+                    get { return Type == MoveType.Illegal; }
+                }*/
+
         public override string ToString()
         {
-            if (Type == MoveType.Normal)
-                return Letter + Number;
-            return Type.ToString();
+            if (this.Type == MoveType.Normal)
+                return this.Letter + this.Number;
+            return this.Type.ToString();
         }
 
         public Move(string letter, string number)
         {
-            Letter = letter;
-            Number = number;
-            Type = MoveType.Normal;
+            this.Letter = letter;
+            this.Number = number;
+            this.Type = MoveType.Normal;
         }
 
         public EndGameReason ToEndGameReason()
         {
-            switch (Type)
+            switch (this.Type)
             {
                 case MoveType.Pass:
                     return EndGameReason.ConsecutivePass;
@@ -66,18 +64,17 @@ namespace GoTournament
             }
         }
 
-        public Move()
-        {
-        }
+        public Move() { }
 
         public static Move SpecialMove(MoveType type)
         {
             return new Move {Type = type};
         }
-
-
+        
         public static Move Parse(string data)
         {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
             var clean = data.Replace(" ", "").Replace("=", "");
             if (clean.Length < 2)
                 return null;

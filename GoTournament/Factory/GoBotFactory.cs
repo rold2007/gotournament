@@ -1,4 +1,4 @@
-namespace GoTournament
+namespace GoTournament.Factory
 {
     using System;
 
