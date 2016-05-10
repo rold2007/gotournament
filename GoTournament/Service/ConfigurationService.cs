@@ -43,7 +43,7 @@ namespace GoTournament.Service
             return Path.Combine(this.currentDirectoryPath, relativePath + ".json");
         }
 
-        public string GetAdjudicatorBinnaryPath()
+        public string GetAdjudicatorBinaryPath()
         {
             return Path.Combine(this.currentDirectoryPath, @"Adjudicator\adjudicator.exe");
         }

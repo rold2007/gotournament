@@ -74,7 +74,7 @@ namespace GoTournament.UnitTest
             catch (Exception ex)
             {
                 Assert.IsType(typeof(FileNotFoundException), ex);
-                Assert.Equal("Bot binnary not found,", ex.Message);
+                Assert.Equal("Bot binary not found,", ex.Message);
             }
         }
 

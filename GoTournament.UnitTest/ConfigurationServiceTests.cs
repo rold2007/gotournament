@@ -97,12 +97,12 @@ namespace GoTournament.UnitTest
         }
 
         [Fact]
-        public void ConfigurationServiceGetAdjudicatorBinnaryPathTest()
+        public void ConfigurationServiceGetAdjudicatorBinaryPathTest()
         {
             var jsonService = new Mock<IJsonService>();
             var fileService = new Mock<IFileService>();
             IConfigurationService configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
-            Assert.True(configurationService.GetAdjudicatorBinnaryPath().EndsWith(@"\Adjudicator\adjudicator.exe"));
+            Assert.True(configurationService.GetAdjudicatorBinaryPath().EndsWith(@"\Adjudicator\adjudicator.exe"));
 
         }
 
