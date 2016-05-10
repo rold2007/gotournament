@@ -33,7 +33,7 @@ namespace GoTournament
             if (botInstanceName == null) throw new ArgumentNullException(nameof(botInstanceName));
             var fileService = simpleInjector.GetInstance<IFileService>();
             if (!fileService.FileExists(binaryPath))
-                throw new FileNotFoundException("Bot binnary not found,", binaryPath);
+                throw new FileNotFoundException("Bot binary not found,", binaryPath);
             this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(binaryPath, "--mode gtp");
             this.process.DataReceived = this.OnDataReceived;
             this.Name = botInstanceName;

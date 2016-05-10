@@ -9,11 +9,11 @@ namespace GoTournament
         private bool disposed;
         private IProcessWrapper process;
 
-        public ProcessManager(IProcessProxy processProxy, string binnaryPath, string arguments)
+        public ProcessManager(IProcessProxy processProxy, string binaryPath, string arguments)
         {
             if (processProxy == null)
                 throw new ArgumentNullException(nameof(processProxy));
-            this.CreateProccess(processProxy, binnaryPath, arguments);
+            this.CreateProccess(processProxy, binaryPath, arguments);
         }
 
         public Action<string> DataReceived { get; set; }
@@ -23,11 +23,11 @@ namespace GoTournament
             this.process.WriteData(data, args);
         }
 
-        private void CreateProccess(IProcessProxy processProxy, string binnaryPath, string arguments)
+        private void CreateProccess(IProcessProxy processProxy, string binaryPath, string arguments)
         {
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = binnaryPath,
+                FileName = binaryPath,
                 Arguments = arguments,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
@@ -46,7 +46,7 @@ namespace GoTournament
             }
             catch (Exception ex)
             {
-                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}'", binnaryPath, arguments), new[] {ex});
+                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}'", binaryPath, arguments), new[] {ex});
             }
         }
 

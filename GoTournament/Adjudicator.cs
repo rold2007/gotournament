@@ -38,8 +38,8 @@ namespace GoTournament
             if (tournament == null) throw new ArgumentNullException(nameof(tournament));
             var fileService = simpleInjector.GetInstance<IFileService>();
             this.configurationService = simpleInjector.GetInstance<IConfigurationService>();
-            var binaryPath = this.configurationService.GetAdjudicatorBinnaryPath();
-            if (!fileService.FileExists(binaryPath)) throw new FileNotFoundException("Adjudicator binnary not found,", binaryPath);
+            var binaryPath = this.configurationService.GetAdjudicatorBinaryPath();
+            if (!fileService.FileExists(binaryPath)) throw new FileNotFoundException("Adjudicator binary not found,", binaryPath);
             this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(binaryPath, "--mode gtp");
             this.logger = simpleInjector.GetInstance<ILogger>();
             this.process.DataReceived = this.OnDataReceived;

@@ -6,6 +6,6 @@
     {
         void SerializeGameResult(GameResult result, string fileName);
         T ReadConfig<T>(string relativePath);
-        string GetAdjudicatorBinnaryPath();
+        string GetAdjudicatorBinaryPath();
     }
 }
