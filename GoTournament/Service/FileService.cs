@@ -6,7 +6,6 @@ namespace GoTournament.Service
 
     public class FileService : IFileService
     {
-        
         public bool FileExists(string path)
         {
             return File.Exists(path);
@@ -21,6 +20,5 @@ namespace GoTournament.Service
         {
             return File.ReadAllText(filePath);
         }
-
     }
 }

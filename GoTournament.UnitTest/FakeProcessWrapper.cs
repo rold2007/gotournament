@@ -4,15 +4,23 @@ namespace GoTournament.UnitTest
     using System.Diagnostics;
     using System.Reflection;
 
+    using GoTournament.Interface;
+
     public class FakeProcessWrapper : IProcessWrapper
     {
         public event DataReceivedEventHandler OutputDataReceived;
 
-        public void BeginOutputReadLine() { }
+        public void BeginOutputReadLine()
+        {
+        }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
-        public void WriteData(string data, params object[] args) { }
+        public void WriteData(string data, params object[] args)
+        {  
+        }
 
         public void RaiseOutputDataReceived(string data)
         {
@@ -20,12 +28,14 @@ namespace GoTournament.UnitTest
             var ctorInfo = type.GetConstructor(
                 BindingFlags.NonPublic | BindingFlags.Instance,
                 null,
-                new Type[] { typeof(String) },
+                new Type[] { typeof(string) },
                 null);
-            DataReceivedEventArgs obj = (DataReceivedEventArgs)(ctorInfo.Invoke(new object[] {data}));
+            DataReceivedEventArgs obj = (DataReceivedEventArgs)ctorInfo.Invoke(new object[] { data });
 
             if (this.OutputDataReceived != null)
-                this.OutputDataReceived.Invoke(this, obj );
+            {
+                this.OutputDataReceived.Invoke(this, obj);
+            }
         }
     }
 }

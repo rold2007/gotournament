@@ -1,11 +1,11 @@
-﻿using System;
-using Xunit;
-using GoTournament.Interface;
-using Moq;
-using GoTournament.Model;
-
-namespace GoTournament.UnitTest
+﻿namespace GoTournament.UnitTest
 {
+    using System;
+    using GoTournament.Interface;
+    using GoTournament.Model;
+    using Moq;
+    using Xunit;
+
     public class BotRunnerTests
     {
         [Fact]
@@ -26,6 +26,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: adjudicator", ex.Message);
             }
+
             try
             {
                 botRunner = new BotRunner(adjudicator.Object, null, null);
@@ -36,6 +37,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: black", ex.Message);
             }
+
             try
             {
                 botRunner = new BotRunner(adjudicator.Object, blackBot.Object, null);
@@ -46,6 +48,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: white", ex.Message);
             }
+
             try
             {
                 botRunner = new BotRunner(adjudicator.Object, blackBot.Object, blackBot.Object);
@@ -56,6 +59,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentException), ex);
                 Assert.Equal("Two instances cannot point to the same object", ex.Message);
             }
+
             try
             {
                 botRunner = new BotRunner(adjudicator.Object, blackBot.Object, whiteBot.Object);
@@ -66,6 +70,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(NotSupportedException), ex);
                 Assert.Equal("Give unique names to the bot instances. Be creative.", ex.Message);
             }
+
             blackBot.Setup(s => s.Name).Returns(() => "Alice");
             whiteBot.Setup(s => s.Name).Returns(() => "Alice");
             try
@@ -117,7 +122,6 @@ namespace GoTournament.UnitTest
             Assert.NotNull(gameResult);
             Assert.Equal(EndGameReason.Resign, gameResult.EndReason);
 
-
             Assert.NotNull(botRunner);
             Assert.NotNull(botRunner.EndGame);
             blackBot.VerifyAll();
@@ -148,7 +152,5 @@ namespace GoTournament.UnitTest
             blackBot.VerifyAll();
             whiteBot.VerifyAll();
         }
-
-
     }
 }

@@ -1,13 +1,13 @@
-using System;
-using System.IO;
-using GoTournament.Interface;
-using GoTournament.Service;
-using GoTournament.Model;
-using Moq;
-using Xunit;
-
 namespace GoTournament.UnitTest
 {
+    using System;
+    using System.IO;
+    using GoTournament.Interface;
+    using GoTournament.Model;
+    using GoTournament.Service;
+    using Moq;
+    using Xunit;
+
     public class ConfigurationServiceTests
     {
         [Fact]
@@ -24,6 +24,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: jsonService", ex.Message);
             }
+
             var jsonService = new Mock<IJsonService>();
             try
             {
@@ -35,6 +36,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: fileService", ex.Message);
             }
+
             var fileService = new Mock<IFileService>();
             configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
             Assert.NotNull(configurationService);
@@ -103,8 +105,6 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             IConfigurationService configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
             Assert.True(configurationService.GetAdjudicatorBinaryPath().EndsWith(@"\Adjudicator\adjudicator.exe"));
-
         }
-
     }
 }

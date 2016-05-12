@@ -1,12 +1,10 @@
-﻿using System.IO;
-using GoTournament.Interface;
-using GoTournament.Service;
-
-using Xunit;
-
-namespace GoTournament.UnitTest
+﻿namespace GoTournament.UnitTest
 {
     using System;
+    using System.IO;
+    using GoTournament.Interface;
+    using GoTournament.Service;
+    using Xunit;
 
     public class FileServiceTests
     {
@@ -31,7 +29,9 @@ namespace GoTournament.UnitTest
             fileService.FileWriteAllText(tempFile, content);
             Assert.Equal(content, fileService.FileReadAllText(tempFile));
             if (fileService.FileExists(tempFile))
+            {
                 File.Delete(tempFile);
+            }
         }
     }
 }

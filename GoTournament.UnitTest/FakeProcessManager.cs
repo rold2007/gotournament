@@ -12,13 +12,13 @@ namespace GoTournament.UnitTest
         {
             this.process = process;
         }
+        
+        public Action<string> DataReceived { get; set; }
 
         public void Dispose()
         {
             this.process.Dispose();
         }
-
-        public Action<string> DataReceived { get; set; }
 
         public void WriteData(string data)
         {

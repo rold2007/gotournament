@@ -62,7 +62,6 @@ namespace GoTournament.UnitTest
 
             adjudicator = new Adjudicator(injector.Object, new Tournament());
 
-
             adjudicator.BlackMoves(Move.Parse("a6"));
             fakeProcess.DataReceived("= ");
             adjudicator.BlackMoves(null);
@@ -118,8 +117,6 @@ namespace GoTournament.UnitTest
             injector.VerifyAll();
             processFactory.VerifyAll();
             fileService.VerifyAll();
-
-
         }
 
         [Fact]
@@ -153,7 +150,6 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            //logger
             var logger = new Mock<ILogger>();
             var logs = new List<string>();
             injector.Setup(s => s.GetInstance<ILogger>()).Returns(() => logger.Object);
@@ -163,14 +159,11 @@ namespace GoTournament.UnitTest
                         {
                             logs.Add(string.Format(s, o));
                         });
-            //Adjudicator creating
             var adjudicator = new Adjudicator(injector.Object, new Tournament());
             GameResult gameResult = null;
             adjudicator.Resigned = result => gameResult = result;
             adjudicator.SaveGameResults = true;
-
-
-
+            
             adjudicator.BlackMoves(Move.Parse("&99"));
             Task.Run(
                 () =>
@@ -199,7 +192,6 @@ namespace GoTournament.UnitTest
             injector.VerifyAll();
             processFactory.VerifyAll();
             fileService.VerifyAll();
-
         }
 
         [Fact]
@@ -220,8 +212,7 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            //Adjudicator creating
-            var adjudicator = new Adjudicator(injector.Object, new Tournament() { BoardSize = 2, WhiteBot = "weiss", BlackBot = "schwarz"});
+            var adjudicator = new Adjudicator(injector.Object, new Tournament() { BoardSize = 2, WhiteBot = "weiss", BlackBot = "schwarz" });
             GameResult gameResult = null;
             adjudicator.Resigned = result => gameResult = result;
             adjudicator.GenerateLastBoard = true;
@@ -242,19 +233,14 @@ namespace GoTournament.UnitTest
             Task.Run(
                 () =>
                     {
-                        Thread.Sleep(1000);
-                        // fakeProcess.DataReceived("= ");
-                        // fakeProcess.DataReceived("= ");
-                        fakeProcess.DataReceived("   A B");  
+                        Thread.Sleep(2000);
+                        fakeProcess.DataReceived("   A B");
                         fakeProcess.DataReceived("   A B");
                         fakeProcess.DataReceived(" 2 O O 2     WHITE (O) has captured 2 stones");
                         fakeProcess.DataReceived(" 1 . . 1     BLACK (X) has captured 0 stones");
                         fakeProcess.DataReceived("   A B");
                     });
             adjudicator.BlackMoves(Move.Parse("resign"));
-
-            // fakeProcess.DataReceived("resign");
-
             Assert.Equal(EndGameReason.Resign, gameResult.EndReason);
             Assert.Equal("   A B\n 2 O O 2     WHITE (O) has captured 2 stones\n 1 . . 1     BLACK (X) has captured 0 stones\n   A B", gameResult.FinalBoard);
             Assert.Equal(6, processWrittenData.Count);
@@ -265,12 +251,9 @@ namespace GoTournament.UnitTest
             Assert.Equal("showboard", processWrittenData.ElementAt(4));
             Assert.Equal("showboard", processWrittenData.ElementAt(5));
 
-
-
             injector.VerifyAll();
             processFactory.VerifyAll();
             fileService.VerifyAll();
-
         }
     }
 }

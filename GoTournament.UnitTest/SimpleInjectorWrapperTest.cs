@@ -25,6 +25,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: container", ex.Message);
             }
+
             Container cont = new Container();
             injector = new SimpleInjectorWrapper(cont);
             Assert.NotNull(injector);
@@ -39,7 +40,7 @@ namespace GoTournament.UnitTest
             var service = injector.GetInstance<IFileService>();
             Assert.NotNull(service);
             Assert.IsType(typeof(FileService), service);
-            
+
             try
             {
                 var notRegistered = injector.GetInstance<IJsonService>();

@@ -1,18 +1,13 @@
-using System;
-using GoTournament.Interface;
-using Moq;
-using Xunit;
-
 namespace GoTournament.UnitTest
 {
+    using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
-
+    using GoTournament.Interface;
     using GoTournament.Model;
-
-    using Xunit.Sdk;
+    using Moq;
+    using Xunit;
 
     public class GnuGoBotTests
     {
@@ -30,6 +25,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: simpleInjector", ex.Message);
             }
+
             var injector = new Mock<ISimpleInjectorWrapper>();
             try
             {
@@ -41,6 +37,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: binaryPath", ex.Message);
             }
+
             try
             {
                 bot = new GnuGoBot(injector.Object, "bot.exe", null);
@@ -51,6 +48,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: botInstanceName", ex.Message);
             }
+
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
@@ -60,10 +58,7 @@ namespace GoTournament.UnitTest
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
             bot = new GnuGoBot(injector.Object, "bot.exe", "Goodman");
             Assert.NotNull(bot);
-            //Assert.Equal("Goodman", bot.Name);
             Assert.NotNull(bot.MovePerformed);
-            //Assert.Equal(19, bot.BoardSize);
-
 
             fileService.Setup(s => s.FileExists("noFile")).Returns(() => false);
             try
@@ -101,6 +96,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(NotSupportedException), ex);
                 Assert.Equal("Board size could be from 1 to 19", ex.Message);
             }
+
             bot.BoardSize = 5;
             Assert.Equal(5, bot.BoardSize);
             bot.StartGame(true);
@@ -173,6 +169,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: move", ex.Message);
             }
+
             bot.Dispose();
             Assert.Equal("quit", writeDataList.FirstOrDefault());
             Assert.Equal(true, disposed);
@@ -198,6 +195,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(NotSupportedException), ex);
                 Assert.Equal("Invoke StartGame before placing the move", ex.Message);
             }
+
             bot.StartGame(false);
             bot.PlaceMove(Move.SpecialMove(MoveType.Resign));
             Assert.Equal("black Resign", writeDataList.ElementAt(1));
@@ -231,6 +229,5 @@ namespace GoTournament.UnitTest
             Assert.Equal("black A1", writeDataList.ElementAt(0));
             Assert.Equal("genmove white", writeDataList.ElementAt(1));
         }
-
     }
 }

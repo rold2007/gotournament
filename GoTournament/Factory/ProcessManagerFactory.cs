@@ -1,8 +1,7 @@
-﻿using GoTournament.Interface;
-using System;
-
-namespace GoTournament.Factory
+﻿namespace GoTournament.Factory
 {
+    using System;
+    using GoTournament.Interface;
 
     public class ProcessManagerFactory : IProcessManagerFactory
     {
@@ -11,7 +10,10 @@ namespace GoTournament.Factory
         public ProcessManagerFactory(IProcessProxy processProxy)
         {
             if (processProxy == null)
+            {
                 throw new ArgumentNullException(nameof(processProxy));
+            }
+
             this.processProxy = processProxy;
         }
 

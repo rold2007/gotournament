@@ -1,13 +1,12 @@
-﻿using System;
-using GoTournament.Interface;
-using GoTournament.Model;
-using GoTournament.Service;
-using Moq;
-using Xunit;
-
-namespace GoTournament.UnitTest
+﻿namespace GoTournament.UnitTest
 {
-    
+    using System;
+    using GoTournament.Interface;
+    using GoTournament.Model;
+    using GoTournament.Service;
+    using Moq;
+    using Xunit;
+
     public class ConfigurationReaderTests
     {
         [Fact]
@@ -23,14 +22,15 @@ namespace GoTournament.UnitTest
             {
                 Assert.IsType(typeof(ArgumentNullException), ex);
             }
+
             Assert.Null(reader);
             var configurationService = new Mock<IConfigurationService>();
             reader = new ConfigurationReader(configurationService.Object);
             Assert.NotNull(reader);
             Assert.IsType(typeof(ConfigurationReader), reader);
-           /* reader = new ConfigurationReader();
-            Assert.NotNull(reader);
-            Assert.IsType(typeof(ConfigurationReader), reader);*/
+            /* reader = new ConfigurationReader();
+             Assert.NotNull(reader);
+             Assert.IsType(typeof(ConfigurationReader), reader);*/
         }
 
         [Fact]

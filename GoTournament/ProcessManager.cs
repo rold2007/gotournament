@@ -1,9 +1,9 @@
-using System;
-using System.Diagnostics;
-using GoTournament.Interface;
-
 namespace GoTournament
 {
+    using System;
+    using System.Diagnostics;
+    using GoTournament.Interface;
+
     public class ProcessManager : IProcessManager
     {
         private bool disposed;
@@ -12,8 +12,16 @@ namespace GoTournament
         public ProcessManager(IProcessProxy processProxy, string binaryPath, string arguments)
         {
             if (processProxy == null)
+            {
                 throw new ArgumentNullException(nameof(processProxy));
+            }
+
             this.CreateProccess(processProxy, binaryPath, arguments);
+        }
+
+        ~ProcessManager()
+        {
+            this.Dispose(false);
         }
 
         public Action<string> DataReceived { get; set; }
@@ -21,6 +29,12 @@ namespace GoTournament
         public void WriteData(string data, params object[] args)
         {
             this.process.WriteData(data, args);
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         private void CreateProccess(IProcessProxy processProxy, string binaryPath, string arguments)
@@ -42,25 +56,29 @@ namespace GoTournament
                 {
                     this.process.OutputDataReceived += this.ProcessOutputDataReceived;
                     this.process.BeginOutputReadLine();
-                } else throw new NullReferenceException("IProcessProxy produced null object");
+                }
+                else
+                {
+                    throw new NullReferenceException("IProcessProxy produced null object");
+                }
             }
             catch (Exception ex)
             {
-                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}'", binaryPath, arguments), new[] {ex});
+                throw new AggregateException(string.Format("Failed to run process '{0}' with arguments '{1}'", binaryPath, arguments), new[] { ex });
             }
         }
 
         private void ProcessOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            if (this.disposed) return;
-            if (this.DataReceived != null) this.DataReceived(e.Data);
-        }
+            if (this.disposed)
+            {
+                return;
+            }
 
-        #region IDisposable pattern
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            if (this.DataReceived != null)
+            {
+                this.DataReceived(e.Data);
+            }
         }
 
         private void Dispose(bool disposing)
@@ -75,15 +93,9 @@ namespace GoTournament
                         this.process = null;
                     }
                 }
+
                 this.disposed = true;
             }
         }
-
-        ~ProcessManager()
-        {
-            this.Dispose(false);
-        }
-
-        #endregion
     }
 }
