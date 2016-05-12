@@ -1,28 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using GoTournament.Interface;
-using GoTournament.Model;
-using GoTournament.Service;
-using SimpleInjector;
-
-namespace GoTournament.Benchmark
+﻿namespace GoTournament.Benchmark
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Threading.Tasks;
     using GoTournament.Factory;
+    using GoTournament.Interface;
+    using GoTournament.Model;
+    using GoTournament.Service;
+    using SimpleInjector;
 
-    class ProgramBenchmark
+    public class ProgramBenchmark
     {
         private static readonly Stopwatch Watch = new Stopwatch();
         private static TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
-        private static IGoBotFactory goBotFactory;
+        private static IGoBotFactory botFactory;
         private static BotKind botKind;
 
-        static void Main()
+        public static void Main()
         {
             var minimumBoardSize = 4;
             var maximumBoardSize = 19;
@@ -34,7 +31,7 @@ namespace GoTournament.Benchmark
                                select BenchmarkSettings.Create(boardSize, difficulty, difficulty)).ToList();
             var injector = Bootstrap();
             var reader = injector.GetInstance<IConfigurationReader>();
-            goBotFactory = injector.GetInstance<IGoBotFactory>();
+            botFactory = injector.GetInstance<IGoBotFactory>();
             botKind = reader.ReadBotKind("GnuGo");
             RunBenchmark(listToCheck);
             Console.ReadLine();
@@ -46,6 +43,7 @@ namespace GoTournament.Benchmark
             {
                 await DoTest(entry);
             }
+
             Console.WriteLine("____________________________________");
             Console.WriteLine("Benchmark was finished");
         }
@@ -57,22 +55,24 @@ namespace GoTournament.Benchmark
             tcs = new TaskCompletionSource<bool>();
             Watch.Restart();
 
-            var botWhite = goBotFactory.CreateBotInstance(botKind, "WhiteBot");
+            var botWhite = botFactory.CreateBotInstance(botKind, "WhiteBot");
             botWhite.BoardSize = settings.BoardSize;
             botWhite.Level = settings.FirstBotLevel;
 
-            var botBlack = goBotFactory.CreateBotInstance(new BotKind { BinaryPath = botKind.BinaryPath, FullClassName = botKind.FullClassName}, "BlackBot");
+            var botBlack = botFactory.CreateBotInstance(new BotKind { BinaryPath = botKind.BinaryPath, FullClassName = botKind.FullClassName }, "BlackBot");
             botBlack.BoardSize = settings.BoardSize;
             botBlack.Level = settings.SecondBotLevel;
 
-            var judge = new Adjudicator(Bootstrap(),
+            var judge = new Adjudicator(
+                Bootstrap(),
                 new Tournament
                 {
                     BoardSize = settings.BoardSize,
                     BlackBot = "BlackBot",
                     WhiteBot = "WhiteBot",
                     Name = "Benchmarking"
-                }) { SaveGameResults = true, GenerateLastBoard = true };
+                })
+            { SaveGameResults = true, GenerateLastBoard = true };
             var runner = new BotRunner(judge, botBlack, botWhite) { EndGame = OnTestFinised };
             await tcs.Task;
             runner.Cancel();
@@ -81,8 +81,13 @@ namespace GoTournament.Benchmark
         private static void OnTestFinised(GameResult stat)
         {
             Watch.Stop();
-            Console.WriteLine("Game duration: {0}\nReason of the game finish: {1}\nFinal score is: {2}",
-                string.Format("{0:D2}m:{1:D2}s:{2:D3}ms", Watch.Elapsed.Minutes, Watch.Elapsed.Seconds, Watch.Elapsed.Milliseconds), stat.EndReason, stat.FinalScore);
+            var length = string.Format(
+                "{0:D2}m:{1:D2}s:{2:D3}ms",
+                Watch.Elapsed.Minutes,
+                Watch.Elapsed.Seconds,
+                Watch.Elapsed.Milliseconds);
+            Console.WriteLine(
+                            "Game duration: {0}\nReason of the game finish: {1}\nFinal score is: {2}", length, stat.EndReason, stat.FinalScore);
             Console.WriteLine(stat.FinalBoard);
             tcs.SetResult(true);
         }

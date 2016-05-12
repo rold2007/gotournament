@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using GoTournament.Interface;
-
 namespace GoTournament
 {
+    using System;
+    using System.Collections.Generic;
+    using GoTournament.Interface;
     using GoTournament.Model;
 
     public class BotRunner : IBotRunner
@@ -13,11 +11,30 @@ namespace GoTournament
 
         public BotRunner(IAdjudicator adjudicator, IGoBot black, IGoBot white)
         {
-            if (adjudicator == null) throw new ArgumentNullException(nameof(adjudicator));
-            if (black == null) throw new ArgumentNullException(nameof(black));
-            if (white == null) throw new ArgumentNullException(nameof(white));
-            if (ReferenceEquals(black, white)) throw new ArgumentException("Two instances cannot point to the same object");
-            if (black.Name == white.Name) throw new NotSupportedException("Give unique names to the bot instances. Be creative.");
+            if (adjudicator == null)
+            {
+                throw new ArgumentNullException(nameof(adjudicator));
+            }
+
+            if (black == null)
+            {
+                throw new ArgumentNullException(nameof(black));
+            }
+
+            if (white == null)
+            {
+                throw new ArgumentNullException(nameof(white));
+            }
+
+            if (ReferenceEquals(black, white))
+            {
+                throw new ArgumentException("Two instances cannot point to the same object");
+            }
+
+            if (black.Name == white.Name)
+            {
+                throw new NotSupportedException("Give unique names to the bot instances. Be creative.");
+            }
 
             this.bots = new List<IDisposable> { black, white, adjudicator };
 
@@ -40,8 +57,6 @@ namespace GoTournament
                  Console.WriteLine("black {0}", m);
                  black.PlaceMove(m);
              };*/
-
-
             adjudicator.Resigned = stat =>
             {
                 this.EndGame(stat);
@@ -51,15 +66,14 @@ namespace GoTournament
             white.StartGame(false);
             black.StartGame(true);
         }
+        
+        public bool IsFinished { get; private set; }
 
-
+        public Action<GameResult> EndGame { get; set; }
+        
         public void Cancel()
         {
             this.bots.ForEach(b => b.Dispose());
         }
-
-        public bool IsFinished { get; private set; }
-
-        public Action<GameResult> EndGame { get; set; }
     }
 }

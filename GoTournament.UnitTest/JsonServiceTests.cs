@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GoTournament.Service;
-using Xunit;
-
-namespace GoTournament.UnitTest
+﻿namespace GoTournament.UnitTest
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using GoTournament.Service;
+    using Xunit;
+
     public class JsonServiceTests
     {
         [Fact]

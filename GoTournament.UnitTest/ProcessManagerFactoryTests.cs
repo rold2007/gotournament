@@ -1,15 +1,11 @@
-﻿using GoTournament.Interface;
-
-using Moq;
-
-using Xunit;
-
-namespace GoTournament.UnitTest
+﻿namespace GoTournament.UnitTest
 {
     using System;
     using System.Diagnostics;
-
     using GoTournament.Factory;
+    using GoTournament.Interface;
+    using Moq;
+    using Xunit;
 
     public class ProcessManagerFactoryTests
     {
@@ -27,6 +23,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: processProxy", ex.Message);
             }
+
             var proxy = new Mock<IProcessProxy>();
             factory = new ProcessManagerFactory(proxy.Object);
             Assert.NotNull(factory);
@@ -40,7 +37,7 @@ namespace GoTournament.UnitTest
             var process = new Mock<IProcessWrapper>();
             proxy.Setup(s => s.Start(It.IsAny<ProcessStartInfo>()))
                 .Callback<ProcessStartInfo>(c => startInfo = c)
-                .Returns(()=>process.Object);
+                .Returns(() => process.Object);
             IProcessManagerFactory factory = new ProcessManagerFactory(proxy.Object);
             var wrapper = factory.Create("bot.exe", "args");
             Assert.NotNull(wrapper);

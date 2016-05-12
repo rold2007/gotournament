@@ -41,6 +41,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: data", ex.Message);
             }
+
             move = Move.Parse("Z19");
             Assert.Equal("Z", move.Letter);
             Assert.Equal("19", move.Number);
@@ -61,6 +62,7 @@ namespace GoTournament.UnitTest
                 Assert.NotNull(move);
                 Assert.Equal(element.Value, move.Type);
             }
+
             move = Move.Parse("love");
             Assert.Null(move);
         }

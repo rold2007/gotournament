@@ -13,7 +13,7 @@
 
         public void WriteWarning(string message, params object[] args)
         {
-            Debug.WriteLine("Warning: "+message, args);
+            Debug.WriteLine("Warning: " + message, args);
         }
 
         public void WriteError(string message, params object[] args)

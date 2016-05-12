@@ -3,6 +3,8 @@ namespace GoTournament
     using System;
     using System.Diagnostics;
 
+    using GoTournament.Interface;
+
     public class ProcessWrapper : IProcessWrapper
     {
         private readonly Process process;
@@ -10,8 +12,24 @@ namespace GoTournament
         public ProcessWrapper(Process process)
         {
             if (process == null)
+            {
                 throw new ArgumentNullException(nameof(process));
+            }
+
             this.process = process;
+        }
+
+        public event DataReceivedEventHandler OutputDataReceived
+        {
+            add
+            {
+                this.process.OutputDataReceived += value;
+            }
+
+            remove
+            {
+                this.process.OutputDataReceived -= value;
+            }
         }
 
         public void WriteData(string data, params object[] args)
@@ -23,19 +41,7 @@ namespace GoTournament
         {
             this.process.BeginOutputReadLine();
         }
-
-        public event DataReceivedEventHandler OutputDataReceived
-        {
-            add
-            {
-                this.process.OutputDataReceived += value;
-            }
-            remove
-            {
-                this.process.OutputDataReceived -= value;
-            }
-        }
-
+        
         public void Dispose()
         {
             this.process.Dispose();

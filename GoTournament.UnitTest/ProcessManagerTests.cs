@@ -26,6 +26,7 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(ArgumentNullException), ex);
                 Assert.Equal("Value cannot be null.\r\nParameter name: processProxy", ex.Message);
             }
+
             Assert.Null(manager);
             var proxy = new Mock<IProcessProxy>();
             ProcessStartInfo startInfo = null;
@@ -45,7 +46,6 @@ namespace GoTournament.UnitTest
                .Returns(() => null);
             try
             {
-
                 manager = new ProcessManager(proxy.Object, "too", "args");
                 Assert.True(false, "Should fail on previous statement");
             }
@@ -54,7 +54,6 @@ namespace GoTournament.UnitTest
                 Assert.IsType(typeof(AggregateException), ex);
                 Assert.Equal("Failed to run process 'too' with arguments 'args'", ex.Message);
             }
-
 
             process.VerifyAll();
             proxy.VerifyAll();
@@ -66,7 +65,7 @@ namespace GoTournament.UnitTest
             var proxy = new Mock<IProcessProxy>();
             ProcessStartInfo startInfo = null;
             var process = new FakeProcessWrapper();
-            
+
             proxy.Setup(s => s.Start(It.IsAny<ProcessStartInfo>()))
                 .Callback<ProcessStartInfo>(c => startInfo = c)
                 .Returns(() => process);

@@ -1,13 +1,13 @@
-﻿using GoTournament.Interface;
-using Newtonsoft.Json;
-
-namespace GoTournament.Service
+﻿namespace GoTournament.Service
 {
+    using GoTournament.Interface;
+    using Newtonsoft.Json;
+
     public class JsonService : IJsonService
     {
         public T DeserializeObject<T>(string value)
         {
-            value = value.Replace("\\","\\\\");
+            value = value.Replace("\\", "\\\\");
             return JsonConvert.DeserializeObject<T>(value);
         }
 

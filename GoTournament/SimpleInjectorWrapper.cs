@@ -13,7 +13,10 @@ namespace GoTournament
         public SimpleInjectorWrapper(Container container)
         {
             if (container == null)
+            {
                 throw new ArgumentNullException(nameof(container));
+            }
+
             this.container = container;
         }
 
