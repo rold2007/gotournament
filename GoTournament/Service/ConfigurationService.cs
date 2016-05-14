@@ -31,6 +31,14 @@ namespace GoTournament.Service
             this.currentDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
+        public string CurrentDirectoryPath
+        {
+            get
+            {
+                return this.currentDirectoryPath;
+            }
+        }
+
         public void SerializeGameResult(GameResult result, string fileName)
         {
             this.fileService.FileWriteAllText(this.GetAbsolutePath(fileName), this.jsonService.SerializeObject(result));
@@ -49,9 +57,9 @@ namespace GoTournament.Service
         
         public string GetAdjudicatorBinaryPath()
         {
-            return Path.Combine(this.currentDirectoryPath, @"Adjudicator\adjudicator.exe");
+            return Path.Combine(this.currentDirectoryPath, @"Adjudicator\GnuGo\gnugo.exe");
         }
-
+        
         private string GetAbsolutePath(string relativePath)
         {
             return Path.Combine(this.currentDirectoryPath, relativePath + ".json");

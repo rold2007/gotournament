@@ -51,11 +51,15 @@ namespace GoTournament.UnitTest
 
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), "noFile")).Returns(() => "noFile");
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), "bot.exe")).Returns(() => "bot.exe");
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
             var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(() => new Mock<IProcessManager>().Object);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
+            var confServ = new Mock<IConfigurationService>();
+            injector.Setup(s => s.GetInstance<IConfigurationService>()).Returns(() => confServ.Object);
             bot = new GnuGoBot(injector.Object, "bot.exe", "Goodman");
             Assert.NotNull(bot);
             Assert.NotNull(bot.MovePerformed);
@@ -79,11 +83,14 @@ namespace GoTournament.UnitTest
             var injector = new Mock<ISimpleInjectorWrapper>();
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), "bot.exe")).Returns(() => "bot.exe");
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
             var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(() => new Mock<IProcessManager>().Object);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
+            var confServ = new Mock<IConfigurationService>();
+            injector.Setup(s => s.GetInstance<IConfigurationService>()).Returns(() => confServ.Object);
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.Equal(19, bot.BoardSize);
             try
@@ -118,11 +125,14 @@ namespace GoTournament.UnitTest
             var injector = new Mock<ISimpleInjectorWrapper>();
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), "bot.exe")).Returns(() => "bot.exe");
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
             var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(() => new Mock<IProcessManager>().Object);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
+            var confServ = new Mock<IConfigurationService>();
+            injector.Setup(s => s.GetInstance<IConfigurationService>()).Returns(() => confServ.Object);
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.Equal(-1, bot.Level);
             bot.Level = 5;
@@ -147,6 +157,7 @@ namespace GoTournament.UnitTest
             bool disposed = false;
             var injector = new Mock<ISimpleInjectorWrapper>();
             var fileService = new Mock<IFileService>();
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), "bot.exe")).Returns(() => "bot.exe");
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
             var processWrapper = new Mock<IProcessManager>();
@@ -158,6 +169,8 @@ namespace GoTournament.UnitTest
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(() => processWrapper.Object);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
+            var confServ = new Mock<IConfigurationService>();
+            injector.Setup(s => s.GetInstance<IConfigurationService>()).Returns(() => confServ.Object);
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             try
             {
@@ -214,11 +227,15 @@ namespace GoTournament.UnitTest
 
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), "bot.exe")).Returns(() => "bot.exe");
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
 
             var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => fakeProcess);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
+
+            var confServ = new Mock<IConfigurationService>();
+            injector.Setup(s => s.GetInstance<IConfigurationService>()).Returns(() => confServ.Object);
 
             var bot = new GnuGoBot(injector.Object, "bot.exe", "BotName");
             Assert.NotNull(fakeProcess.DataReceived);

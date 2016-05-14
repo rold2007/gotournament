@@ -39,12 +39,14 @@ namespace GoTournament
             }
 
             var fileService = simpleInjector.GetInstance<IFileService>();
-            if (!fileService.FileExists(binaryPath))
+            var confService = simpleInjector.GetInstance<IConfigurationService>();
+            var path = fileService.PathCombine(confService.CurrentDirectoryPath, binaryPath);
+            if (!fileService.FileExists(path))
             {
-                throw new FileNotFoundException("Bot binary not found,", binaryPath);
+                throw new FileNotFoundException("Bot binary not found,", path);
             }
 
-            this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(binaryPath, "--mode gtp");
+            this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(path, "--mode gtp");
             this.process.DataReceived = this.OnDataReceived;
             this.Name = botInstanceName;
             this.MovePerformed = delegate { }; // To reduce null reference checking 

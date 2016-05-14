@@ -37,10 +37,13 @@ namespace GoTournament.UnitTest
         {
             var injector = new Mock<ISimpleInjectorWrapper>();
             var fileService = new Mock<IFileService>();
-            fileService.Setup(s => s.FileExists("bot.exe")).Returns(() => true);
+            fileService.Setup(s => s.FileExists("gnugo.exe")).Returns(() => true);
+            fileService.Setup(s => s.PathCombine(It.IsAny<string>(), It.IsAny<string>())).Returns(() => "gnugo.exe");
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
             var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessManager>().Object);
+            var confServ = new Mock<IConfigurationService>();
+            injector.Setup(s => s.GetInstance<IConfigurationService>()).Returns(() => confServ.Object);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
 
             IGoBotFactory botFactory = new GoBotFactory(injector.Object);

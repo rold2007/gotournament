@@ -104,7 +104,7 @@ namespace GoTournament.UnitTest
             var jsonService = new Mock<IJsonService>();
             var fileService = new Mock<IFileService>();
             IConfigurationService configurationService = new ConfigurationService(jsonService.Object, fileService.Object);
-            Assert.True(configurationService.GetAdjudicatorBinaryPath().EndsWith(@"\Adjudicator\adjudicator.exe"));
+            Assert.True(configurationService.GetAdjudicatorBinaryPath().EndsWith(@"\Adjudicator\GnuGo\gnugo.exe"));
         }
     }
 }
