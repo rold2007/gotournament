@@ -20,5 +20,10 @@ namespace GoTournament.Service
         {
             return File.ReadAllText(filePath);
         }
+
+        public string PathCombine(string first, string second)
+        {
+            return Path.Combine(first, second);
+        }
     }
 }
