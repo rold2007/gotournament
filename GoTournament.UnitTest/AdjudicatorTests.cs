@@ -242,7 +242,7 @@ namespace GoTournament.UnitTest
                     });
             adjudicator.BlackMoves(Move.Parse("resign"));
             Assert.Equal(EndGameReason.Resign, gameResult.EndReason);
-            Assert.Equal("   A B\n 2 O O 2     WHITE (O) has captured 2 stones\n 1 . . 1     BLACK (X) has captured 0 stones\n   A B", gameResult.FinalBoard);
+            Assert.True(gameResult.FinalBoard.StartsWith("   A B\n 2 O O 2     WHITE (O) has captured 2 stones\n 1 . . 1     BLACK (X) has captured 0 stones"));
             Assert.Equal(6, processWrittenData.Count);
             Assert.Equal("boardsize {0}", processWrittenData.ElementAt(0));
             Assert.Equal("black a1", processWrittenData.ElementAt(1));
