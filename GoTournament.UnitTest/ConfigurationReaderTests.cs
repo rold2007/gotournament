@@ -42,9 +42,9 @@
             string instanceInput = null;
             string kindInput = null;
 
-            configurationService.Setup(s => s.ReadConfig<Tournament>(It.IsAny<string>()))
+            configurationService.Setup(s => s.ReadConfig<Duel>(It.IsAny<string>()))
                 .Callback<string>(d => tournamentInput = d)
-                .Returns(() => new Tournament { Name = "TourName" });
+                .Returns(() => new Duel { Name = "TourName" });
             configurationService.Setup(s => s.ReadConfig<BotInstance>(It.IsAny<string>()))
                 .Callback<string>(d => instanceInput = d)
                 .Returns(() => new BotInstance { Name = "InstanceName" });
@@ -52,10 +52,10 @@
                 .Callback<string>(d => kindInput = d)
                 .Returns(() => new BotKind { Name = "KindName" });
 
-            var tour = reader.ReadTournament("daisy");
+            var tour = reader.ReadDuel("daisy");
             Assert.NotNull(tour);
             Assert.Equal("TourName", tour.Name);
-            Assert.Equal("Configuration\\Tournament\\daisy", tournamentInput);
+            Assert.Equal("Configuration\\Duel\\daisy", tournamentInput);
 
             var instance = reader.ReadBotInstance("flower");
             Assert.NotNull(instance);

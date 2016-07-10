@@ -18,9 +18,9 @@
             this.configurationService = configurationService;
         }
 
-        public Tournament ReadTournament(string name)
+        public Duel ReadDuel(string name)
         {
-            return this.configurationService.ReadConfig<Tournament>("Configuration\\Tournament\\" + name);
+            return this.configurationService.ReadConfig<Duel>("Configuration\\Duel\\" + name);
         }
 
         public BotInstance ReadBotInstance(string name)

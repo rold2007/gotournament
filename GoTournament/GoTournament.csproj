@@ -64,14 +64,16 @@
     <Compile Include="Factory\GoBotFactory.cs" />
     <Compile Include="Interface\IGoBotFactory.cs" />
     <Compile Include="Interface\IConfigurationReader.cs" />
-    <Compile Include="Interface\ITournamentInitializer.cs" />
+    <Compile Include="Interface\IDuelInitializer.cs" />
     <Compile Include="Interface\IProcessProxy.cs" />
     <Compile Include="Interface\ISimpleInjectorWrapper.cs" />
     <Compile Include="Interface\IProcessWrapper.cs" />
     <Compile Include="Model\BotInstance.cs" />
     <Compile Include="Model\Color.cs" />
-    <Compile Include="Model\Tournament.cs" />
+    <Compile Include="Model\Duel.cs" />
     <Compile Include="Model\MoveType.cs" />
+    <Compile Include="Model\RatingCalculationType.cs" />
+    <Compile Include="Model\Tournament.cs" />
     <Compile Include="ProcessProxy.cs" />
     <Compile Include="ProcessWrapper.cs" />
     <Compile Include="Service\ConfigurationReader.cs" />
@@ -96,9 +98,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Interface\IJsonService.cs" />
+    <Compile Include="Service\IRatingService.cs" />
     <Compile Include="Service\JsonService.cs" />
+    <Compile Include="Service\RatingService.cs" />
     <Compile Include="SimpleInjectorWrapper.cs" />
-    <Compile Include="TournamentInitializer.cs" />
+    <Compile Include="DuelInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -141,16 +145,20 @@
     <None Include="Configuration\BotKind\GnuGo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Configuration\Tournament\DaisyVsMadison.json">
+    <None Include="Configuration\Duel\DaisyVsMadison.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration\Duel\LindaVsLeo.json" />
+    <None Include="Configuration\Duel\LucyVsLeo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Configuration\Duel\SofiaVsAmelia.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Configuration\Tournament\DaisyVsMadison.json" />
     <None Include="Configuration\Tournament\LindaVsLeo.json" />
-    <None Include="Configuration\Tournament\LucyVsLeo.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Configuration\Tournament\SofiaVsAmelia.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="Configuration\Tournament\LucyVsLeo.json" />
+    <None Include="Configuration\Tournament\SofiaVsAmelia.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

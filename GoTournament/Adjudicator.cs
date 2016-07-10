@@ -14,7 +14,7 @@ namespace GoTournament
         private const string Black = "black ";
         private const string White = "white ";
         private readonly List<string> boardParts = new List<string>(26);
-        private readonly Tournament tournament;
+        private readonly Duel duel;
         private readonly IConfigurationService configurationService;
         private readonly ILogger logger;
         private IProcessManager process;
@@ -30,16 +30,16 @@ namespace GoTournament
         
         #region Ctors
 
-        public Adjudicator(ISimpleInjectorWrapper simpleInjector, Tournament tournament)
+        public Adjudicator(ISimpleInjectorWrapper simpleInjector, Duel duel)
         {
             if (simpleInjector == null)
             {
                 throw new ArgumentNullException(nameof(simpleInjector));
             }
 
-            if (tournament == null)
+            if (duel == null)
             {
-                throw new ArgumentNullException(nameof(tournament));
+                throw new ArgumentNullException(nameof(duel));
             }
 
             var fileService = simpleInjector.GetInstance<IFileService>();
@@ -53,10 +53,10 @@ namespace GoTournament
             this.process = simpleInjector.GetInstance<IProcessManagerFactory>().Create(binaryPath, "--mode gtp");
             this.logger = simpleInjector.GetInstance<ILogger>();
             this.process.DataReceived = this.OnDataReceived;
-            this.tournament = tournament;
-            if (this.tournament.BoardSize != 19)
+            this.duel = duel;
+            if (this.duel.BoardSize != 19)
             {
-                this.process.WriteData("boardsize {0}", this.tournament.BoardSize);
+                this.process.WriteData("boardsize {0}", this.duel.BoardSize);
             }
 
             this.WhiteMoveValidated = delegate { };
@@ -259,12 +259,12 @@ namespace GoTournament
             {
                 EndReason = reason,
                 TotalMoves = this.movesCount,
-                BoardSize = this.tournament.BoardSize
+                BoardSize = this.duel.BoardSize
             };
             if (reason == EndGameReason.Resign)
             {
-                statistic.WinnerName = whiteFinishedGame ? this.tournament.BlackBot : this.tournament.WhiteBot;
-                statistic.LooserName = !whiteFinishedGame ? this.tournament.BlackBot : this.tournament.WhiteBot;
+                statistic.WinnerName = whiteFinishedGame ? this.duel.BlackBot : this.duel.WhiteBot;
+                statistic.LooserName = !whiteFinishedGame ? this.duel.BlackBot : this.duel.WhiteBot;
             }
             else
             {
@@ -272,13 +272,13 @@ namespace GoTournament
                 statistic.FinalScore = score.Item1;
                 if (score.Item2 == Color.White)
                 {
-                    statistic.WinnerName = this.tournament.WhiteBot;
-                    statistic.LooserName = this.tournament.BlackBot;
+                    statistic.WinnerName = this.duel.WhiteBot;
+                    statistic.LooserName = this.duel.BlackBot;
                 }
                 else if (score.Item2 == Color.Black)
                 {
-                    statistic.WinnerName = this.tournament.BlackBot;
-                    statistic.LooserName = this.tournament.WhiteBot;
+                    statistic.WinnerName = this.duel.BlackBot;
+                    statistic.LooserName = this.duel.WhiteBot;
                 }
             }
 
@@ -289,7 +289,7 @@ namespace GoTournament
 
             if (this.SaveGameResults)
             {
-                var fileName = string.Format("{0}{1}", this.tournament.Name, DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
+                var fileName = string.Format("{0}{1}", this.duel.Name, DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss"));
                 this.process.WriteData("printsgf " + fileName + ".sgf");
                 statistic.ResultsFileName = fileName;
                 this.configurationService.SerializeGameResult(statistic, fileName);

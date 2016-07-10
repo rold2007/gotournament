@@ -13,7 +13,7 @@
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Please specify tournament file name in the arguments. Optionally it can be set among of game cycles in the second argument\nFor example: Tournament.exe DaisyVsMadison 10");
+                Console.WriteLine("Please specify tournament file name in the arguments. Optionally it can be set amount of game cycles in the second argument\nFor example: Duel.exe DaisyVsMadison 10");
                 return;
             }
 
@@ -50,7 +50,7 @@
         private static void RunGame(ISimpleInjectorWrapper container, string[] args)
         {
             string gamesCount = (args.Length > 1) ? args[1] : string.Empty;
-            ITournamentInitializer initializer = new TournamentInitializer(container, args.First(), gamesCount);
+            IDuelInitializer initializer = new DuelInitializer(container, args.First(), gamesCount);
             initializer.Run();
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace GoTournament.Model
+﻿using System.Collections.Generic;
+
+namespace GoTournament.Model
 {
     public class Tournament
     {
@@ -6,10 +8,8 @@
 
         public int BoardSize { get; set; }
 
-        public int GamesCount { get; set; }
+        public Dictionary<string, int> Ratings { get; set; }
 
-        public string BlackBot { get; set; }
-
-        public string WhiteBot { get; set; }
+        public RatingCalculationType RatingType { get; set; }
     }
 }
