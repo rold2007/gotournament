@@ -8,6 +8,6 @@
 
         BotKind ReadBotKind(string name);
 
-        Tournament ReadTournament(string name);
+        Duel ReadDuel(string name);
     }
 }

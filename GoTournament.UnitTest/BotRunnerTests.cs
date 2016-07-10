@@ -97,7 +97,7 @@
             var processFactory = new Mock<IProcessManagerFactory>();
             processFactory.Setup(s => s.Create(It.IsAny<string>(), It.IsAny<string>())).Returns(() => new Mock<IProcessManager>().Object);
             injector.Setup(s => s.GetInstance<IProcessManagerFactory>()).Returns(() => processFactory.Object);
-            var adjudicator = new Adjudicator(injector.Object, new Tournament());
+            var adjudicator = new Adjudicator(injector.Object, new Duel());
             var blackBot = new Mock<IGoBot>();
             var whiteBot = new Mock<IGoBot>();
             blackBot.Setup(s => s.Name).Returns(() => "Alice");

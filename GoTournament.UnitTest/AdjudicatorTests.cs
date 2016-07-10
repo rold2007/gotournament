@@ -38,7 +38,7 @@ namespace GoTournament.UnitTest
                         {
                             logs.Add(string.Format(s, o));
                         });
-            var adjudicator = new Adjudicator(injector.Object, new Tournament());
+            var adjudicator = new Adjudicator(injector.Object, new Duel());
             try
             {
                 adjudicator.BlackMoves(null);
@@ -60,7 +60,7 @@ namespace GoTournament.UnitTest
             adjudicator.BlackMoves(Move.Parse("resign"));
             Assert.Equal(EndGameReason.Resign, gameResult.EndReason);
 
-            adjudicator = new Adjudicator(injector.Object, new Tournament());
+            adjudicator = new Adjudicator(injector.Object, new Duel());
 
             adjudicator.BlackMoves(Move.Parse("a6"));
             fakeProcess.DataReceived("= ");
@@ -99,7 +99,7 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var adjudicator = new Adjudicator(injector.Object, new Tournament());
+            var adjudicator = new Adjudicator(injector.Object, new Duel());
             GameResult gameResult = null;
             adjudicator.Resigned = result => gameResult = result;
 
@@ -159,7 +159,7 @@ namespace GoTournament.UnitTest
                         {
                             logs.Add(string.Format(s, o));
                         });
-            var adjudicator = new Adjudicator(injector.Object, new Tournament());
+            var adjudicator = new Adjudicator(injector.Object, new Duel());
             GameResult gameResult = null;
             adjudicator.Resigned = result => gameResult = result;
             adjudicator.SaveGameResults = true;
@@ -212,7 +212,7 @@ namespace GoTournament.UnitTest
             var fileService = new Mock<IFileService>();
             fileService.Setup(s => s.FileExists(It.IsAny<string>())).Returns(() => true);
             injector.Setup(s => s.GetInstance<IFileService>()).Returns(() => fileService.Object);
-            var adjudicator = new Adjudicator(injector.Object, new Tournament() { BoardSize = 2, WhiteBot = "weiss", BlackBot = "schwarz" });
+            var adjudicator = new Adjudicator(injector.Object, new Duel() { BoardSize = 2, WhiteBot = "weiss", BlackBot = "schwarz" });
             GameResult gameResult = null;
             adjudicator.Resigned = result => gameResult = result;
             adjudicator.GenerateLastBoard = true;

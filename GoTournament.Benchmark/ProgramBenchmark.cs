@@ -65,7 +65,7 @@
 
             var judge = new Adjudicator(
                 Bootstrap(),
-                new Tournament
+                new Duel
                 {
                     BoardSize = settings.BoardSize,
                     BlackBot = "BlackBot",
