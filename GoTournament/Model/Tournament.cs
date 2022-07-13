@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace GoTournament.Model
+﻿namespace GoTournament.Model
 {
-    public class Tournament
+   using System.Collections.Generic;
+
+   public class Tournament
     {
         public string Name { get; set; }
 

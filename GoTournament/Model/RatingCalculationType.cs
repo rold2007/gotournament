@@ -1,4 +1,8 @@
 ﻿namespace GoTournament.Model
 {
-    public enum RatingCalculationType { AfterEachGame, AfterEachRound}
+   public enum RatingCalculationType
+   {
+      AfterEachGame,
+      AfterEachRound
+   }
 }
